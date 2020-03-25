@@ -26,6 +26,8 @@ remove_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
 
 pkg_check_modules(XCB_EWMH REQUIRED xcb xcb-ewmh x11)
 
+add_subdirectory(panda-qt5-style)
+
 set (SRCS
     main.cpp
     pandaplatformtheme.h
