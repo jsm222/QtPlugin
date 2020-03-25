@@ -22,8 +22,8 @@
 HintsSettings::HintsSettings(QObject *parent)
     : QObject(parent)
 {
-    m_hints[QPlatformTheme::SystemIconThemeName] = "MacBuntu-OS";
-    m_hints[QPlatformTheme::StyleNames] = "breeze";
+    m_hints[QPlatformTheme::SystemIconThemeName] = "panda";
+    m_hints[QPlatformTheme::StyleNames] = "panda"; // oxygen
     m_hints[QPlatformTheme::SystemIconFallbackThemeName] = QStringLiteral("hicolor");
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
 }

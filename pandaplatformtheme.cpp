@@ -31,6 +31,7 @@ static bool isDBusGlobalMenuAvailable()
 
 PandaPlatformTheme::PandaPlatformTheme()
 {
+qDebug() << "wdnmd";
     m_hints = new HintsSettings;
     
     if (KWindowSystem::isPlatformX11()) {
