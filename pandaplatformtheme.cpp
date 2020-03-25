@@ -13,8 +13,8 @@
 
 #include <KWindowSystem>
 
-static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
-static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
+static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_PANDA_NET_WM_APPMENU_SERVICE_NAME");
+static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_PANDA_NET_WM_APPMENU_OBJECT_PATH");
 
 static bool checkDBusGlobalMenuAvailable()
 {
@@ -31,7 +31,8 @@ static bool isDBusGlobalMenuAvailable()
 
 PandaPlatformTheme::PandaPlatformTheme()
 {
-qDebug() << "wdnmd";
+    qDebug() << "init panda platform theme";
+
     m_hints = new HintsSettings;
     
     if (KWindowSystem::isPlatformX11()) {

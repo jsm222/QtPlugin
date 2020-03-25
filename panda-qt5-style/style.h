@@ -11,10 +11,14 @@ class PROXYSTYLESHARED_EXPORT Style : public QProxyStyle
 public:
     explicit Style();
 
-    void polish(QWidget *widget);
-    void unpolish(QWidget *widget);
-
+    void polish(QWidget *w);
+    void unpolish(QWidget *w);
     void polish(QApplication *app);
+
+    void polish(QPalette &palette);
+
+    void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
+    void drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 };
 
 #endif
