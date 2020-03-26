@@ -52,6 +52,11 @@ void Style::polish(QPalette &palette)
 void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element) {
+
+    case PE_Frame: {
+        break;
+    }
+
     case PE_PanelLineEdit: {
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing, true);
