@@ -74,6 +74,27 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         painter->restore();
         break;
     }
+
+    case PE_PanelButtonCommand: {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor(242, 242, 242));
+
+        if (option->state & State_MouseOver) {
+            // press
+            if (option->state & State_Sunken) {
+                painter->setBrush(QColor(204, 204, 204));
+            } else {
+            // hover
+                painter->setBrush(QColor(224, 224, 224));
+            }
+        }
+
+        painter->drawRoundedRect(option->rect,6, 6);
+        painter->restore();
+        break;
+    }
     
     default:
         QProxyStyle::drawPrimitive(element, option, painter, widget);
