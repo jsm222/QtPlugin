@@ -22,6 +22,7 @@ set (SRCS
     global.h
     style.h
     style.cpp
+    tabbarhelper.cpp
 )
 
 add_library(${TARGET} MODULE ${SRCS})

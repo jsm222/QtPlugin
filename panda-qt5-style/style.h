@@ -2,6 +2,7 @@
 #define STYLE_H
 
 #include <QProxyStyle>
+#include <QStyleOptionTab>
 #include "global.h"
 
 class PROXYSTYLESHARED_EXPORT Style : public QProxyStyle
@@ -19,6 +20,16 @@ public:
 
     void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
     void drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
+    QRect subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *opt, QStyle::SubControl sc, const QWidget *w) const;
+
+    int styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const;
+    int pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
+
+private:
+    // helper functions...
+
+    bool drawTabBar(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
+    bool drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
 };
 
 #endif

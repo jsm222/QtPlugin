@@ -16,24 +16,34 @@ Style::Style()
 
 void Style::polish(QWidget *w)
 {
-    if (!w)
-        return;
+    QProxyStyle::polish(w);
+
+    if (w->inherits("QPushButton") || w->inherits("QCheckBox")
+     || w->inherits("QComboBox") || w->inherits("QRadioButton")
+     || w->inherits("QScrollBar") || w->inherits("QToolButton")
+     || w->inherits("QAbstractSpinBox") || w->inherits("QAbstractSpinBox")
+     || w->inherits("QTabBar"))
+        w->setAttribute(Qt::WA_Hover, true);
+
+    if (w->inherits("QScrollBar"))
+        w->setAttribute(Qt::WA_OpaquePaintEvent, false);
 
     // transparent tooltips
     if (w->inherits("QTipLabel")) {
         w->setAttribute(Qt::WA_TranslucentBackground);
     }
-
-    if (auto v = qobject_cast<QAbstractItemView *>(w)) {
-        v->viewport()->setAttribute(Qt::WA_Hover);
-    }
-
-    QProxyStyle::polish(w);
 }
 
 void Style::unpolish(QWidget *w)
 {
     QProxyStyle::unpolish(w);
+
+    if (w->inherits("QPushButton") || w->inherits("QCheckBox")
+     || w->inherits("QComboBox") || w->inherits("QRadioButton")
+     || w->inherits("QScrollBar") || w->inherits("QToolButton")
+     || w->inherits("QAbstractSpinBox") || w->inherits("QAbstractSpinBox")
+     || w->inherits("QTabBar"))
+        w->setAttribute(Qt::WA_Hover, false);
 }
 
 void Style::polish(QApplication *app)
@@ -95,7 +105,6 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
                 painter->setBrush(QColor(224, 224, 224));
             }
         }
-
         painter->drawRoundedRect(option->rect,6, 6);
         painter->restore();
         break;
@@ -110,8 +119,49 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
 void Style::drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element) {
+    case CE_TabBarTabShape:
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+            if (drawTabBar(painter, tab, widget))
+                return;
+        }
+        break;
+
+    case CE_TabBarTabLabel:
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+            if (drawTabBarLabel(painter, tab, widget))
+                return;
+        }
+        break;
+
     default:
         QProxyStyle::drawControl(element, option, painter, widget);
         break;
     }
+}
+
+QRect Style::subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *opt, QStyle::SubControl sc, const QWidget *widget) const
+{
+    return QProxyStyle::subControlRect(cc, opt, sc, widget);
+}
+
+int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
+{
+    switch (sh) {
+    default:
+        break;
+    }
+
+    return QProxyStyle::styleHint(sh, opt, w, shret);
+}
+
+int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
+{
+    switch (metric) {
+    case PM_ScrollBarExtent: return 13;
+    case PM_ScrollBarSliderMin: return 40;
+    default:
+        break;
+    }
+
+    return QProxyStyle::pixelMetric(metric, option, widget);
 }
