@@ -62,7 +62,7 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         painter->setRenderHint(QPainter::Antialiasing, true);
         if (const QStyleOptionFrame *panel = qstyleoption_cast<const QStyleOptionFrame *>(option)) {
             painter->setPen(Qt::NoPen);
-            painter->setBrush(QColor(242, 242, 242));
+            painter->setBrush(QColor(255, 255, 255, 80));
             painter->drawRoundedRect(panel->rect, 6, 6);
         }
         painter->restore();
@@ -100,7 +100,7 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         painter->restore();
         break;
     }
-    
+
     default:
         QProxyStyle::drawPrimitive(element, option, painter, widget);
         break;
