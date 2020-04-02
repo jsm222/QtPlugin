@@ -1,4 +1,5 @@
 #include "style.h"
+#include "styleanimation.h"
 #include <QApplication>
 #include <QStyleFactory>
 #include <QDebug>
@@ -12,6 +13,7 @@ Style::Style()
     : QProxyStyle("fusion")
 {
     // QStyleFactory::create("panda")
+    // Code reference qfusionstyle.cpp
 }
 
 void Style::polish(QWidget *w)
@@ -64,6 +66,20 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
     switch (element) {
 
     case PE_Frame: {
+        break;
+    }
+
+    case PE_FrameTabWidget: {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(Qt::transparent);
+        painter->drawRect(option->rect);
+        break;
+    }
+
+    case PE_PanelMenu:
+    case PE_FrameMenu: {
+        QColor color(255, 255, 255, 30);
+        painter->fillRect(option->rect, color);
         break;
     }
 
@@ -125,23 +141,47 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opti
                 return;
         }
         break;
-
     case CE_TabBarTabLabel:
         if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
             if (drawTabBarLabel(painter, tab, widget))
                 return;
         }
         break;
-
     default:
         QProxyStyle::drawControl(element, option, painter, widget);
         break;
     }
 }
 
-QRect Style::subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *opt, QStyle::SubControl sc, const QWidget *widget) const
+QRect Style::subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *option, QStyle::SubControl sc, const QWidget *widget) const
 {
-    return QProxyStyle::subControlRect(cc, opt, sc, widget);
+    switch (cc) {
+    case CC_ScrollBar: {
+        auto rect = QProxyStyle::subControlRect(cc, option, sc, widget);
+        if (sc == SC_ScrollBarSlider) {
+            rect.adjust(1, 1, -1, -1);
+            if (option->state.testFlag(QStyle::State_Horizontal)) {
+                rect.adjust(1, 0, -1, 0);
+            } else {
+                rect.adjust(0, 1, 0, -1);
+            }
+            return rect;
+        }
+        return rect;
+    }
+    }
+
+    return QProxyStyle::subControlRect(cc, option, sc, widget);
+}
+
+void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
+                                      QPainter *painter, const QWidget *widget) const
+{
+    switch (control) {
+    default:
+        QProxyStyle::drawComplexControl(control, option, painter, widget);
+        break;
+    }
 }
 
 int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
@@ -157,7 +197,7 @@ int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidge
 int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
 {
     switch (metric) {
-    case PM_ScrollBarExtent: return 13;
+    case PM_ScrollBarExtent: return 11;
     case PM_ScrollBarSliderMin: return 40;
     default:
         break;

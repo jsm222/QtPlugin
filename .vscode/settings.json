@@ -1,6 +1,7 @@
 {
     "files.associations": {
         "qabstractitemview": "cpp",
-        "random": "cpp"
+        "random": "cpp",
+        "qdbusargument": "cpp"
     }
 }

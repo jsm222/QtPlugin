@@ -23,6 +23,9 @@ set (SRCS
     style.h
     style.cpp
     tabbarhelper.cpp
+
+    styleanimation.h
+    styleanimation.cpp
 )
 
 add_library(${TARGET} MODULE ${SRCS})

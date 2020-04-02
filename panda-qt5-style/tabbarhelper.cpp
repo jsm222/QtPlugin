@@ -88,7 +88,7 @@ bool Style::drawTabBar(QPainter *painter,  const QStyleOptionTab *tab, const QWi
         tabFrameColor = QColor(0, 0, 0, 100);
 
     if (!isTriangularMode)
-        tabFrameColor = selected ? QColor(0, 0, 0, 60) : QColor(0, 0, 0, 20);
+        tabFrameColor = selected ? QColor(0, 0, 0, 60) : Qt::transparent;
 
     QPen outlinePen(lineColor, proxy()->pixelMetric(PM_DefaultFrameWidth, tab, widget));
     QRect drawRect = rect;
