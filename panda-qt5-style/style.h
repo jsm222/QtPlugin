@@ -33,6 +33,8 @@ private:
 
     bool drawTabBar(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
     bool drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
+    void drawMenu(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
+    void drawMenuItem(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
 };
 
 #endif

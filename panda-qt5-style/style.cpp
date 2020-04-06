@@ -30,9 +30,9 @@ void Style::polish(QWidget *w)
     if (w->inherits("QScrollBar"))
         w->setAttribute(Qt::WA_OpaquePaintEvent, false);
 
-    // transparent tooltips
-    if (w->inherits("QTipLabel")) {
-        w->setAttribute(Qt::WA_TranslucentBackground);
+    // transparent tooltips and menu
+    if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
+        w->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 }
 
@@ -46,6 +46,10 @@ void Style::unpolish(QWidget *w)
      || w->inherits("QAbstractSpinBox") || w->inherits("QAbstractSpinBox")
      || w->inherits("QTabBar"))
         w->setAttribute(Qt::WA_Hover, false);
+
+    if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
+        w->setAttribute(Qt::WA_TranslucentBackground, false);
+    }
 }
 
 void Style::polish(QApplication *app)
@@ -58,13 +62,26 @@ void Style::polish(QApplication *app)
 void Style::polish(QPalette &palette)
 {
     QColor windowBg(255, 255, 255);
+    QColor fontColor(23, 23, 23);
+    QColor disableColor(204, 204, 204);
+    QColor themeColor(80, 150, 250);
+
     palette.setBrush(QPalette::Window, windowBg);
+    palette.setBrush(QPalette::WindowText, fontColor);
+    palette.setBrush(QPalette::Text, fontColor);
+
+    palette.setBrush(QPalette::Disabled, QPalette::WindowText, disableColor);
+    palette.setBrush(QPalette::Disabled, QPalette::Text, disableColor);
+    palette.setBrush(QPalette::Disabled, QPalette::BrightText,disableColor);
+    palette.setBrush(QPalette::PlaceholderText, disableColor);
+
+    palette.setBrush(QPalette::Highlight, themeColor);
+    palette.setBrush(QPalette::Active, QPalette::Highlight, themeColor);
 }
 
 void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
     switch (element) {
-
     case PE_Frame: {
         break;
     }
@@ -78,8 +95,7 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
 
     case PE_PanelMenu:
     case PE_FrameMenu: {
-        QColor color(255, 255, 255, 30);
-        painter->fillRect(option->rect, color);
+        return drawMenu(option, painter, widget);
         break;
     }
 
@@ -147,6 +163,9 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opti
                 return;
         }
         break;
+    case CE_MenuItem: {
+        return drawMenuItem(option, painter, widget);
+    }
     default:
         QProxyStyle::drawControl(element, option, painter, widget);
         break;
@@ -199,6 +218,8 @@ int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, c
     switch (metric) {
     case PM_ScrollBarExtent: return 11;
     case PM_ScrollBarSliderMin: return 40;
+    case PM_MenuHMargin: return 9;
+    case PM_MenuVMargin: return 19;
     default:
         break;
     }
