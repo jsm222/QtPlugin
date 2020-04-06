@@ -34,7 +34,7 @@ void Style::drawMenu(const QStyleOption *option, QPainter *painter, const QWidge
     painter->drawPixmap(option->rect, pixmap, pixmap.rect());
 
     QColor color = option->palette.color(QPalette::Base);
-    color.setAlpha(170);
+    color.setAlpha(200);
     painter->setPen(Qt::transparent);
     painter->setBrush(color);
 
@@ -69,6 +69,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
                 w = menuItem->fontMetrics.horizontalAdvance(menuItem->text) + margin;
             }
             painter->setPen(option->palette.color(QPalette::Disabled, QPalette::WindowText));
+            painter->setPen(QColor(0, 0, 0, 30));
             bool reverse = menuItem->direction == Qt::RightToLeft;
             painter->drawLine(menuItem->rect.left() + margin + (reverse ? 0 : w), menuItem->rect.center().y(),
                             menuItem->rect.right() - margin - (reverse ? w : 0), menuItem->rect.center().y());
@@ -93,8 +94,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
         const int checkColHOffset = windowsItemHMargin + windowsItemFrame - 1;
         int checkcol = qMax<int>(menuItem->rect.height() * 0.79,   // dpiScaled(21, option)
                                 qMax<int>(menuItem->maxIconWidth, 21)); // icon checkbox's highlight column width
-        if (
-            qobject_cast<const QComboBox*>(widget) ||
+        if (qobject_cast<const QComboBox *>(widget) ||
             (option->styleObject && option->styleObject->property("_q_isComboBoxPopupItem").toBool()))
             ignoreCheckMark = true; //ignore the checkmarks provided by the QComboMenuDelegate
 

@@ -5,8 +5,8 @@
 #include <QDebug>
 #include <QWidget>
 #include <QWindow>
+#include <QMenu>
 #include <QAbstractItemView>
-
 #include <QPainter>
 
 Style::Style() 
@@ -31,14 +31,19 @@ void Style::polish(QWidget *w)
     if (w->inherits("QScrollBar"))
         w->setAttribute(Qt::WA_OpaquePaintEvent, false);
 
-    // transparent tooltips and menu
-    if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
+    // transparent tooltips
+    if (w->inherits("QTipLabel")) {
         w->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
-    if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
+    if (qobject_cast<QMenu *>(w)) {
+        w->setAttribute(Qt::WA_TranslucentBackground, true);
         m_blurHelper->registerWidget(w);
     }
+
+    // if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
+    //     m_blurHelper->registerWidget(w);
+    // }
 }
 
 void Style::unpolish(QWidget *w)
@@ -54,11 +59,12 @@ void Style::unpolish(QWidget *w)
 
     if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
         w->setAttribute(Qt::WA_TranslucentBackground, false);
-    }
-
-    if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
         m_blurHelper->unregisterWidget(w);
     }
+
+    // if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
+    //     m_blurHelper->unregisterWidget(w);
+    // }
 }
 
 void Style::polish(QApplication *app)
@@ -72,7 +78,7 @@ void Style::polish(QPalette &palette)
 {
     QColor windowBg(255, 255, 255);
     QColor fontColor(23, 23, 23);
-    QColor disableColor(204, 204, 204);
+    QColor disableColor(150, 150, 150);
     QColor themeColor(80, 150, 250);
 
     palette.setBrush(QPalette::Window, windowBg);
@@ -229,6 +235,8 @@ int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, c
     case PM_ScrollBarSliderMin: return 40;
     case PM_MenuHMargin: return 9;
     case PM_MenuVMargin: return 19;
+    case PM_SubMenuOverlap:return -2;
+    case PM_ButtonMargin:return  9;
     default:
         break;
     }
