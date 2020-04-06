@@ -4,6 +4,7 @@
 #include <QProxyStyle>
 #include <QStyleOptionTab>
 #include "global.h"
+#include "blurhelper.h"
 
 class PROXYSTYLESHARED_EXPORT Style : public QProxyStyle
 {
@@ -35,6 +36,9 @@ private:
     bool drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
     void drawMenu(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
     void drawMenuItem(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
+
+private:
+    BlurHelper *m_blurHelper;
 };
 
 #endif

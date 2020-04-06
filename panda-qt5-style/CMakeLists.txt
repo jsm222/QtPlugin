@@ -23,6 +23,7 @@ set (SRCS
     style.h
     style.cpp
     tabbarhelper.cpp
+    blurhelper.cpp
     menuhelper.cpp
     styleanimation.h
     styleanimation.cpp

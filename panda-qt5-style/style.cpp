@@ -10,7 +10,8 @@
 #include <QPainter>
 
 Style::Style() 
-    : QProxyStyle("fusion")
+    : QProxyStyle("fusion"),
+      m_blurHelper(new BlurHelper(this))
 {
     // QStyleFactory::create("panda")
     // Code reference qfusionstyle.cpp
@@ -34,6 +35,10 @@ void Style::polish(QWidget *w)
     if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
         w->setAttribute(Qt::WA_TranslucentBackground, true);
     }
+
+    if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
+        m_blurHelper->registerWidget(w);
+    }
 }
 
 void Style::unpolish(QWidget *w)
@@ -49,6 +54,10 @@ void Style::unpolish(QWidget *w)
 
     if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
         w->setAttribute(Qt::WA_TranslucentBackground, false);
+    }
+
+    if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
+        m_blurHelper->unregisterWidget(w);
     }
 }
 
