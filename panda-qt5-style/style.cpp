@@ -210,13 +210,27 @@ void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex
     }
 }
 
-int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
+void setWidgetAttribute(const QWidget *w)
 {
+    if (!w || w->testAttribute(Qt::WA_WState_Created)) 
+        return;
+
     if (auto menu = qobject_cast<const QMenu *>(w)) {
         const_cast<QWidget *>(w)->setAttribute(Qt::WA_TranslucentBackground);
     }
 
+    if (w->inherits("QComboBoxPrivateContainer")) {
+        const_cast<QWidget *>(w)->setAttribute(Qt::WA_TranslucentBackground);
+    }
+}
+
+int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
+{
+    setWidgetAttribute(w);
+
     switch (sh) {
+    case  SH_ComboBox_Popup:
+        return false;
     default:
         break;
     }
