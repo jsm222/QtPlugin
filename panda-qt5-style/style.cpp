@@ -37,13 +37,9 @@ void Style::polish(QWidget *w)
     }
 
     if (qobject_cast<QMenu *>(w)) {
-        w->setAttribute(Qt::WA_TranslucentBackground, true);
+        //w->setAttribute(Qt::WA_TranslucentBackground, true);
         m_blurHelper->registerWidget(w);
     }
-
-    // if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
-    //     m_blurHelper->registerWidget(w);
-    // }
 }
 
 void Style::unpolish(QWidget *w)
@@ -58,13 +54,9 @@ void Style::unpolish(QWidget *w)
         w->setAttribute(Qt::WA_Hover, false);
 
     if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
-        w->setAttribute(Qt::WA_TranslucentBackground, false);
+        //w->setAttribute(Qt::WA_TranslucentBackground, false);
         m_blurHelper->unregisterWidget(w);
     }
-
-    // if (w->testAttribute(Qt::WA_TranslucentBackground) && QWindow::fromWinId(w->winId())->isTopLevel()) {
-    //     m_blurHelper->unregisterWidget(w);
-    // }
 }
 
 void Style::polish(QApplication *app)
@@ -220,6 +212,10 @@ void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex
 
 int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
 {
+    if (auto menu = qobject_cast<const QMenu *>(w)) {
+        const_cast<QWidget *>(w)->setAttribute(Qt::WA_TranslucentBackground);
+    }
+
     switch (sh) {
     default:
         break;
