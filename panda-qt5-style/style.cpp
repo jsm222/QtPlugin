@@ -138,26 +138,39 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
 
     case PE_PanelLineEdit: {
         painter->save();
-        painter->setRenderHint(QPainter::Antialiasing, true);
         if (const QStyleOptionFrame *panel = qstyleoption_cast<const QStyleOptionFrame *>(option)) {
-            painter->setPen(Qt::NoPen);
-            painter->setBrush(QColor(255, 255, 255, 80));
-            painter->drawRoundedRect(panel->rect, 6, 6);
+            painter->fillRect(panel->rect, Qt::transparent);
         }
         painter->restore();
-        break;
     }
 
     case PE_FrameLineEdit: {
+        QRect r = rect;
+        bool hasFocus = option->state & State_HasFocus;
+
         painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        QRectF frameRect(option->rect);
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(242, 242, 242));
-        painter->drawRoundedRect(frameRect.adjusted(0.5, 0.5, -0.5, -0.5), 6, 6);
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        //  ### highdpi painter bug.
+        painter->translate(0.5, 0.5);
+        painter->fillRect(r, Qt::transparent);
+
+        const QColor outline = QColor(195, 195, 195, 100);
+        const QColor highlightedOutline = option->palette.color(QPalette::Highlight);
+
+        // Draw Outline
+        painter->setPen(QPen(hasFocus ? highlightedOutline : outline));
+        painter->setBrush(QColor(255, 255, 255, 100));
+
+        const qreal radius = r.height() * 0.2;
+        painter->drawRoundedRect(r.adjusted(0, 0, -radius / 2, - radius / 2), radius, radius);
+
+        // Draw inner shadow
+        // painter->setPen(QColor(242, 242, 242));
+        // painter->drawLine(QPoint(r.left() + 2, r.top() + 1), QPoint(r.right() - 2, r.top() + 1));
+
         painter->restore();
-        break;
     }
+    break;
 
     case PE_IndicatorItemViewItemCheck: {
         QStyleOptionButton button;
