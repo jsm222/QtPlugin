@@ -7,7 +7,34 @@
 #include <QWindow>
 #include <QMenu>
 #include <QAbstractItemView>
+#include <QFontMetrics>
 #include <QPainter>
+
+static QColor mergedColors(const QColor &colorA, const QColor &colorB, int factor = 50)
+{
+    const int maxFactor = 100;
+    QColor tmp = colorA;
+    tmp.setRed((tmp.red() * factor) / maxFactor + (colorB.red() * (maxFactor - factor)) / maxFactor);
+    tmp.setGreen((tmp.green() * factor) / maxFactor + (colorB.green() * (maxFactor - factor)) / maxFactor);
+    tmp.setBlue((tmp.blue() * factor) / maxFactor + (colorB.blue() * (maxFactor - factor)) / maxFactor);
+    return tmp;
+}
+
+static QColor outline(const QPalette &pal) 
+{
+    if (pal.window().style() == Qt::TexturePattern)
+        return QColor(0, 0, 0, 160);
+
+    return pal.window().color().darker(140);
+}
+
+static QColor highlightedOutline(const QPalette &pal) 
+{
+    QColor highlightedOutline = pal.color(QPalette::Highlight).darker(125);
+    if (highlightedOutline.value() > 160)
+        highlightedOutline.setHsl(highlightedOutline.hue(), highlightedOutline.saturation(), 160);
+    return highlightedOutline;
+}
 
 Style::Style() 
     : QProxyStyle("fusion"),
@@ -88,6 +115,9 @@ void Style::polish(QPalette &palette)
 
 void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
 {
+    QRect rect = option->rect;
+    int state = option->state;
+
     switch (element) {
     case PE_Frame: {
         break;
@@ -128,6 +158,67 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         painter->restore();
         break;
     }
+
+    case PE_IndicatorItemViewItemCheck: {
+        QStyleOptionButton button;
+        button.QStyleOption::operator=(*option);
+        button.state &= ~State_MouseOver;
+        proxy()->drawPrimitive(PE_IndicatorCheckBox, &button, painter, widget);
+    }
+    return;
+
+    case PE_IndicatorCheckBox:
+        painter->save();
+        if (const QStyleOptionButton *checkbox = qstyleoption_cast<const QStyleOptionButton*>(option)) {
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->translate(0.5, 0.5);
+            rect = rect.adjusted(0, 0, -1, -1);
+
+            QColor pressedColor = mergedColors(option->palette.base().color(), option->palette.windowText().color(), 85);
+            painter->setBrush(Qt::NoBrush);
+
+            // Gradient fill
+            QLinearGradient gradient(rect.topLeft(), rect.bottomLeft());
+            gradient.setColorAt(0, (state & State_Sunken) ? pressedColor : option->palette.base().color().darker(115));
+            gradient.setColorAt(0.15, (state & State_Sunken) ? pressedColor : option->palette.base().color());
+            gradient.setColorAt(1, (state & State_Sunken) ? pressedColor : option->palette.base().color());
+
+            QColor outlineColor = outline(option->palette);
+            painter->setBrush((state & State_Sunken) ? QBrush(pressedColor) : gradient);
+            painter->setPen(QPen(outlineColor.lighter(110)));
+            if (option->state & State_HasFocus && option->state & State_KeyboardFocusChange)
+                painter->setPen(option->palette.color(QPalette::Highlight));
+            painter->drawRoundedRect(rect, 3, 3);
+
+            QColor checkMarkColor = option->palette.text().color().darker(120);
+            const qreal checkMarkPadding = 1 + rect.width() * 0.13; // at least one pixel padding
+
+            if (checkbox->state & State_NoChange) {
+                gradient = QLinearGradient(rect.topLeft(), rect.bottomLeft());
+                checkMarkColor.setAlpha(80);
+                gradient.setColorAt(0, checkMarkColor);
+                checkMarkColor.setAlpha(140);
+                gradient.setColorAt(1, checkMarkColor);
+                checkMarkColor.setAlpha(180);
+                painter->setPen(QPen(checkMarkColor, 1));
+                painter->setBrush(gradient);
+                painter->drawRect(rect.adjusted(checkMarkPadding, checkMarkPadding, -checkMarkPadding, -checkMarkPadding));
+
+            } else if (checkbox->state & State_On) {
+                painter->setPen(checkMarkColor);
+                painter->setBrush(Qt::NoBrush);
+
+                // Draw checkmark
+                QPainterPath path;
+                const qreal rectHeight = rect.height(); // assuming height equals width
+                path.moveTo(checkMarkPadding + rectHeight * 0.11, rectHeight * 0.47);
+                path.lineTo(rectHeight * 0.5, rectHeight - checkMarkPadding);
+                path.lineTo(rectHeight - checkMarkPadding, checkMarkPadding);
+                painter->drawPath(path.translated(rect.topLeft()));
+            }
+        }
+        painter->restore();
+        break;
 
     case PE_PanelButtonCommand: {
         painter->save();
