@@ -10,6 +10,8 @@
 #include <QFontMetrics>
 #include <QPainter>
 
+static const QByteArray s_blurBehindPropertyName = QByteArrayLiteral("ENABLE_BLUR_BEHIND_HINT");
+
 static QColor mergedColors(const QColor &colorA, const QColor &colorB, int factor = 50)
 {
     const int maxFactor = 100;
@@ -67,6 +69,12 @@ void Style::polish(QWidget *w)
         //w->setAttribute(Qt::WA_TranslucentBackground, true);
         m_blurHelper->registerWidget(w);
     }
+
+    const auto blurBehindProperty = w->property(s_blurBehindPropertyName.constData());
+
+    if (blurBehindProperty.toBool()) {
+        m_blurHelper->registerWidget(w);
+    }
 }
 
 void Style::unpolish(QWidget *w)
@@ -82,6 +90,12 @@ void Style::unpolish(QWidget *w)
 
     if (w->inherits("QTipLabel") || w->inherits("QMenu")) {
         //w->setAttribute(Qt::WA_TranslucentBackground, false);
+        m_blurHelper->unregisterWidget(w);
+    }
+
+    const auto blurBehindProperty = w->property(s_blurBehindPropertyName.constData());
+
+    if (blurBehindProperty.toBool()) {
         m_blurHelper->unregisterWidget(w);
     }
 }
@@ -238,6 +252,9 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setPen(Qt::NoPen);
         painter->setBrush(QColor(242, 242, 242));
+
+        if (widget->property("ENABLE_TRANSPARENT").toBool())
+            painter->setBrush(Qt::transparent);
 
         if (option->state & State_MouseOver) {
             // press

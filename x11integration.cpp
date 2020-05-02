@@ -68,9 +68,6 @@ bool X11Integration::eventFilter(QObject *watched, QEvent *event)
     //         QPlatformSurfaceEvent *pe = static_cast<QPlatformSurfaceEvent*>(event);
     //         if (!w->flags().testFlag(Qt::ForeignWindow)) {
     //             if (pe->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
-    //                 if (qApp->property(s_schemePropertyName).isValid()) {
-    //                     installColorScheme(w);
-    //                 }
     //                 const auto blurBehindProperty = w->property(s_blurBehindPropertyName.constData());
     //                 if (blurBehindProperty.isValid()) {
     //                     KWindowEffects::enableBlurBehind(w->winId(), blurBehindProperty.toBool());
