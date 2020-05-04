@@ -112,7 +112,7 @@ void Style::polish(QPalette &palette)
     QColor windowBg(255, 255, 255);
     QColor fontColor(23, 23, 23);
     QColor disableColor(150, 150, 150);
-    QColor themeColor(80, 150, 250);
+    QColor themeColor(84, 156, 255);
 
     palette.setBrush(QPalette::Window, windowBg);
     palette.setBrush(QPalette::WindowText, fontColor);
@@ -183,16 +183,94 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         // painter->drawLine(QPoint(r.left() + 2, r.top() + 1), QPoint(r.right() - 2, r.top() + 1));
 
         painter->restore();
+        break;
     }
-    break;
 
     case PE_IndicatorItemViewItemCheck: {
         QStyleOptionButton button;
         button.QStyleOption::operator=(*option);
         button.state &= ~State_MouseOver;
         proxy()->drawPrimitive(PE_IndicatorCheckBox, &button, painter, widget);
+        break;
     }
-    return;
+
+    case PE_IndicatorHeaderArrow: {
+        if (const QStyleOptionHeader *header = qstyleoption_cast<const QStyleOptionHeader *>(option)) {
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing,true);
+            painter->setBrush(Qt::NoBrush);
+            if(option->state & State_Enabled){
+                painter->setPen(QPen(option->palette.foreground().color(), 1.1));
+                if (option->state & State_MouseOver) {
+                    painter->setPen(QPen(option->palette.color(QPalette::Highlight), 1.1));
+                }
+            }
+            else {
+                painter->setPen(QPen(option->palette.color(QPalette::Text), 1.1));
+            }
+            QPolygon points(5);
+            //Add 8 to center vertically
+            int x = option->rect.x() + 9;
+            int y = option->rect.y() + 9;
+
+            int w = 8;
+            int h =  4;
+            x += (option->rect.width() - w) / 2;
+            y += (option->rect.height() - h) / 2;
+            if (header->sortIndicator & QStyleOptionHeader::SortUp) {
+                points[0] = QPoint(x, y);
+                points[1] = QPoint(x + w / 2, y + h);
+                points[2] = QPoint(x + w / 2, y + h);
+                points[3] = QPoint(x + w, y);
+            } else if (header->sortIndicator & QStyleOptionHeader::SortDown) {
+                points[0] = QPoint(x, y + h);
+                points[1] = QPoint(x + w / 2, y);
+                points[2] = QPoint(x + w / 2, y);
+                points[3] = QPoint(x + w, y + h);
+            }
+            painter->drawLine(points[0],  points[1] );
+            painter->drawLine(points[2],  points[3] );
+            painter->restore();
+        }
+        break;
+    }
+
+    case PE_PanelItemViewItem: {
+        if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
+            QPalette::ColorGroup cg = (widget ? widget->isEnabled() : (vopt->state & QStyle::State_Enabled))
+                                      ? QPalette::Normal : QPalette::Disabled;
+            if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+                cg = QPalette::Inactive;
+            bool isIconView = (vopt->decorationPosition & QStyleOptionViewItem::Top);
+
+            if (vopt->state & QStyle::State_Selected) {
+                painter->save();
+                painter->setRenderHint(QPainter::Antialiasing);
+                painter->setPen(Qt::transparent);
+                painter->setBrush(vopt->palette.brush(cg, QPalette::Highlight));
+
+                if (isIconView)
+                    painter->drawRoundedRect(option->rect, 6, 6);
+                else
+                    painter->drawRect(option->rect);
+
+                painter->restore();
+            } else {
+                if (vopt->backgroundBrush.style() != Qt::NoBrush) {
+                    QPointF oldBO = painter->brushOrigin();
+                    painter->setBrushOrigin(vopt->rect.topLeft());
+                    painter->fillRect(vopt->rect, vopt->backgroundBrush);
+                    painter->setBrushOrigin(oldBO);
+                }
+
+                if (vopt->state & QStyle::State_Selected) {
+                    QRect textRect = subElementRect(QStyle::SE_ItemViewItemText,  option, widget);
+                    painter->fillRect(textRect, vopt->palette.brush(cg, QPalette::Highlight));
+                }
+            }
+        }
+        break;
+    }
 
     case PE_IndicatorCheckBox:
         painter->save();
@@ -276,26 +354,104 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
     }
 }
 
-void Style::drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const
+void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt, QPainter *painter, const QWidget *widget) const
 {
     switch (element) {
     case CE_TabBarTabShape:
-        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
             if (drawTabBar(painter, tab, widget))
                 return;
         }
         break;
+
     case CE_TabBarTabLabel:
-        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
             if (drawTabBarLabel(painter, tab, widget))
                 return;
         }
         break;
+
     case CE_MenuItem: {
-        return drawMenuItem(option, painter, widget);
+        return drawMenuItem(opt, painter, widget);
     }
+
+    case CE_ItemViewItem:
+        if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(opt)) {
+            painter->save();
+            painter->setClipRect(opt->rect);
+
+            QRect checkRect = proxy()->subElementRect(SE_ItemViewItemCheckIndicator, vopt, widget);
+            QRect iconRect = proxy()->subElementRect(SE_ItemViewItemDecoration, vopt, widget);
+            QRect textRect = proxy()->subElementRect(SE_ItemViewItemText, vopt, widget);
+
+            // draw the background
+            proxy()->drawPrimitive(PE_PanelItemViewItem, opt, painter, widget);
+
+            // draw the check mark
+            if (vopt->features & QStyleOptionViewItem::HasCheckIndicator) {
+                QStyleOptionViewItem option(*vopt);
+                option.rect = checkRect;
+                option.state = option.state & ~QStyle::State_HasFocus;
+
+                switch (vopt->checkState) {
+                case Qt::Unchecked:
+                    option.state |= QStyle::State_Off;
+                    break;
+                case Qt::PartiallyChecked:
+                    option.state |= QStyle::State_NoChange;
+                    break;
+                case Qt::Checked:
+                    option.state |= QStyle::State_On;
+                    break;
+                }
+                proxy()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &option, painter, widget);
+            }
+
+            // draw the icon
+            QIcon::Mode mode = QIcon::Normal;
+            if (!(vopt->state & QStyle::State_Enabled))
+                mode = QIcon::Disabled;
+            else if (vopt->state & QStyle::State_Selected)
+                mode = QIcon::Selected;
+            QIcon::State state = vopt->state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+            vopt->icon.paint(painter, iconRect, vopt->decorationAlignment, mode, state);
+
+            // draw the text
+            if (!vopt->text.isEmpty()) {
+                QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+                                        ? QPalette::Normal : QPalette::Disabled;
+                if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+                    cg = QPalette::Inactive;
+
+                if (vopt->state & QStyle::State_Selected) {
+                    painter->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+                } else {
+                    painter->setPen(vopt->palette.color(cg, QPalette::Text));
+                }
+                if (vopt->state & QStyle::State_Editing) {
+                    painter->setPen(vopt->palette.color(cg, QPalette::Text));
+                    painter->drawRect(textRect.adjusted(0, 0, -1, -1));
+                }
+
+                viewItemDrawText(painter, vopt, textRect);
+            }
+
+            // 不绘画 focus 状态
+            painter->restore();
+        }
+    break;
+
+    // table header style.
+    case CE_HeaderSection: {
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->fillRect(opt->rect, opt->palette.alternateBase().color());
+        painter->restore();
+        break;
+    }
+
     default:
-        QProxyStyle::drawControl(element, option, painter, widget);
+        QProxyStyle::drawControl(element, opt, painter, widget);
         break;
     }
 }
@@ -362,12 +518,13 @@ int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidge
 int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
 {
     switch (metric) {
-    case PM_ScrollBarExtent: return 11;
+    case PM_ScrollBarExtent: return 12;
     case PM_ScrollBarSliderMin: return 40;
     case PM_MenuHMargin: return 9;
     case PM_MenuVMargin: return 19;
-    case PM_SubMenuOverlap:return -2;
-    case PM_ButtonMargin:return  9;
+    case PM_SubMenuOverlap: return -2;
+    case PM_ButtonMargin: return 10;
+    case PM_HeaderMargin: return 10;
     default:
         break;
     }

@@ -22,6 +22,7 @@ set (SRCS
     global.h
     style.h
     style.cpp
+    styleutils.cpp
     tabbarhelper.cpp
     blurhelper.cpp
     menuhelper.cpp
@@ -31,6 +32,7 @@ set (SRCS
 
 add_library(${TARGET} MODULE ${SRCS})
 target_link_libraries(${TARGET} 
+    Qt5::GuiPrivate
     Qt5::Core
     Qt5::Gui
     Qt5::Widgets

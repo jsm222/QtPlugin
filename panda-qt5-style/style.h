@@ -3,6 +3,8 @@
 
 #include <QProxyStyle>
 #include <QStyleOptionTab>
+#include <QTextOption>
+
 #include "global.h"
 #include "blurhelper.h"
 
@@ -36,6 +38,13 @@ private:
     bool drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const QWidget *widget) const;
     void drawMenu(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
     void drawMenuItem(const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
+
+    // utils
+    QString calculateElidedText(const QString &text, const QTextOption &textOption,
+                                const QFont &font, const QRect &textRect, const Qt::Alignment valign,
+                                Qt::TextElideMode textElideMode, int flags,
+                                bool lastVisibleLineShouldBeElided, QPointF *paintStartPosition) const;
+    void viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, const QRect &rect) const;
 
 private:
     BlurHelper *m_blurHelper;
