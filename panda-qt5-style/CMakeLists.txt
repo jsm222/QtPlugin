@@ -28,6 +28,7 @@ set (SRCS
     menuhelper.cpp
     styleanimation.h
     styleanimation.cpp
+    scrollbarhelper.cpp
 )
 
 add_library(${TARGET} MODULE ${SRCS})

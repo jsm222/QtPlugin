@@ -375,6 +375,50 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
         return drawMenuItem(opt, painter, widget);
     }
 
+    case CE_ScrollBarSlider: {
+        const QStyleOptionSlider *sliderOption(qstyleoption_cast<const QStyleOptionSlider *>(opt));
+        if (!sliderOption)
+            break;
+
+        const State &state(opt->state);
+        bool horizontal(state & State_Horizontal);
+
+        // copy rect and palette
+        const QRect &rect(horizontal ? opt->rect.adjusted(-1, 4, 0, -4) : opt->rect.adjusted(4, -1, -4, 0));
+        const QPalette &palette(opt->palette);
+
+        // define handle rect
+        QRect handleRect;
+
+        bool enabled(state & State_Enabled);
+        bool mouseOver((state & State_Active) && enabled && (state & State_MouseOver));
+        bool sunken(enabled && (state & (State_On | State_Sunken)));
+        qreal opacity;
+        if (mouseOver)
+            opacity = 0.7;
+        else
+            opacity = 0.2;
+
+        if (horizontal) {
+            handleRect = rect.adjusted(0, 6, 0, 2);
+            handleRect.adjust(0, -6.0 * opacity, 0, -2.0 * opacity);
+        } else {
+            handleRect = rect.adjusted(6, 0, 2, 0);
+            handleRect.adjust(-6.0 * opacity, 0, -2.0 * opacity, 0);
+        }
+
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        qreal metric(handleRect.width() < handleRect.height() ? handleRect.width() : handleRect.height());
+        qreal radius(0.5 * metric);
+        painter->setPen(Qt::NoPen);
+        painter->setOpacity(opacity);
+        painter->setBrush(opt->palette.windowText());
+        painter->drawRoundedRect(handleRect, radius, radius);
+        painter->restore();
+        break;
+    }
+
     case CE_ItemViewItem:
         if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(opt)) {
             painter->save();
@@ -460,27 +504,64 @@ QRect Style::subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex
 {
     switch (cc) {
     case CC_ScrollBar: {
-        auto rect = QProxyStyle::subControlRect(cc, option, sc, widget);
-        if (sc == SC_ScrollBarSlider) {
-            rect.adjust(1, 1, -1, -1);
-            if (option->state.testFlag(QStyle::State_Horizontal)) {
-                rect.adjust(1, 0, -1, 0);
-            } else {
-                rect.adjust(0, 1, 0, -1);
-            }
-            return rect;
-        }
-        return rect;
-    }
+        return scrollBarSubControlRect(option, sc, widget);
     }
 
-    return QProxyStyle::subControlRect(cc, option, sc, widget);
+    default:
+        return QProxyStyle::subControlRect(cc, option, sc, widget);
+    }
 }
 
 void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
                                       QPainter *painter, const QWidget *widget) const
 {
     switch (control) {
+    case CC_ScrollBar: {
+        bool enabled(option->state & State_Enabled);
+        bool mouseOver((option->state & State_Active) && option->state & State_MouseOver);
+        // render full groove directly, rather than using the addPage and subPage control element methods
+        if (mouseOver && option->subControls & SC_ScrollBarGroove) {
+            // retrieve groove rectangle
+            // QRect grooveRect(subControlRect(CC_ScrollBar, option, SC_ScrollBarGroove, widget));
+            // const State &state(option->state);
+            // bool horizontal(state & State_Horizontal);
+            // if (horizontal)
+            //     grooveRect = centerRect(grooveRect, grooveRect.width(), Metrics::ScrollBar_SliderWidth);
+            // else
+            //     grooveRect = centerRect(grooveRect, Metrics::ScrollBar_SliderWidth, grooveRect.height());
+            // render
+            if (enabled) {
+                painter->setPen(Qt::NoPen);
+                // painter->setBrush(QColor(255, 255, 255, 150));
+                painter->setBrush(Qt::transparent);
+                painter->drawRect(option->rect);
+            }
+        }
+
+        if (const QStyleOptionSlider *scrollbar = qstyleoption_cast<const QStyleOptionSlider *>(option)) {
+            QStyleOptionSlider newScrollbar = *scrollbar;
+            State saveFlags = scrollbar->state;
+
+            if (scrollbar->subControls & SC_ScrollBarSlider) {
+                            newScrollbar.rect = scrollbar->rect;
+                newScrollbar.state = saveFlags;
+                newScrollbar.rect = proxy()->subControlRect(CC_ScrollBar, &newScrollbar, SC_ScrollBarSlider, widget);
+                if (newScrollbar.rect.isValid()) {
+                    proxy()->drawControl(CE_ScrollBarSlider, &newScrollbar, painter, widget);
+
+                    if (scrollbar->state & State_HasFocus) {
+                        QStyleOptionFocusRect fropt;
+                        fropt.QStyleOption::operator=(newScrollbar);
+                        fropt.rect.setRect(newScrollbar.rect.x() + 2, newScrollbar.rect.y() + 2,
+                                        newScrollbar.rect.width() - 5,
+                                        newScrollbar.rect.height() - 5);
+                        proxy()->drawPrimitive(PE_FrameFocusRect, &fropt, painter, widget);
+                    }
+                }
+            }
+        }
+        break;
+    }
     default:
         QProxyStyle::drawComplexControl(control, option, painter, widget);
         break;
@@ -506,8 +587,10 @@ int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidge
     setWidgetAttribute(w);
 
     switch (sh) {
-    case  SH_ComboBox_Popup:
+    case SH_ComboBox_Popup:
         return false;
+    case SH_ScrollBar_Transient:
+        return true;
     default:
         break;
     }
@@ -518,13 +601,23 @@ int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidge
 int Style::pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const
 {
     switch (metric) {
-    case PM_ScrollBarExtent: return 12;
-    case PM_ScrollBarSliderMin: return 40;
     case PM_MenuHMargin: return 9;
     case PM_MenuVMargin: return 19;
     case PM_SubMenuOverlap: return -2;
     case PM_ButtonMargin: return 10;
     case PM_HeaderMargin: return 10;
+
+    // scrollbars
+    case PM_ScrollBarExtent:
+        return Metrics::ScrollBar_Extend;
+    case PM_ScrollBarSliderMin:
+        return Metrics::ScrollBar_MinSliderHeight;
+
+    case PM_SplitterWidth:
+        return Metrics::Splitter_SplitterWidth;
+    case PM_DockWidgetSeparatorExtent:
+        return Metrics::Splitter_SplitterWidth;
+
     default:
         break;
     }

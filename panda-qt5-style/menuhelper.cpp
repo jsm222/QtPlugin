@@ -106,7 +106,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
             QRectF checkRectF(option->rect.left() + boxMargin + checkColHOffset, option->rect.center().y() - boxWidth/2 + 1, boxWidth, boxWidth);
             QRect checkRect = checkRectF.toRect();
             checkRect.setWidth(checkRect.height()); // avoid .toRect() round error results in non-perfect square
-            checkRect = visualRect(menuItem->direction, menuItem->rect, checkRect);
+            checkRect = QProxyStyle::visualRect(menuItem->direction, menuItem->rect, checkRect);
             if (checkable) {
                 if (menuItem->checkType & QStyleOptionMenuItem::Exclusive) {
                     // Radio button
@@ -146,7 +146,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
         const QStyleOptionMenuItem *menuitem = menuItem;
 
         QPainter *p = painter;
-        QRect vCheckRect = visualRect(opt->direction, menuitem->rect,
+        QRect vCheckRect = QProxyStyle::visualRect(opt->direction, menuitem->rect,
                                     QRect(menuitem->rect.x() + checkColHOffset, menuitem->rect.y(),
                                             checkcol, menuitem->rect.height()));
         if (!menuItem->icon.isNull()) {
@@ -202,7 +202,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
         int windowsRightBorder = 5;
 
         QRect textRect(xpos, y + windowsItemVMargin, w - xm - windowsRightBorder - tab + 1, h - 2 * windowsItemVMargin);
-        QRect vTextRect = visualRect(opt->direction, menuitem->rect, textRect);
+        QRect vTextRect = QProxyStyle::visualRect(opt->direction, menuitem->rect, textRect);
         QStringRef s(&menuitem->text);
         if (!s.isEmpty()) {                     // draw text
             p->save();
@@ -212,7 +212,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
                 text_flags |= Qt::TextHideMnemonic;
             text_flags |= Qt::AlignLeft;
             if (t >= 0) {
-                QRect vShortcutRect = visualRect(opt->direction, menuitem->rect,
+                QRect vShortcutRect = QProxyStyle::visualRect(opt->direction, menuitem->rect,
                                                 QRect(textRect.topRight(), QPoint(menuitem->rect.right(), textRect.bottom())));
                 const QString textToDraw = s.mid(t + 1).toString();
                 if (dis && !act && proxy()->styleHint(SH_EtchDisabledText, option, widget)) {
@@ -251,7 +251,7 @@ void Style::drawMenuItem(const QStyleOption *option, QPainter *painter, const QW
             PrimitiveElement arrow;
             arrow = option->direction == Qt::RightToLeft ? PE_IndicatorArrowLeft : PE_IndicatorArrowRight;
             int xpos = menuItem->rect.left() + menuItem->rect.width() - 3 - dim;
-            QRect  vSubMenuRect = visualRect(option->direction, menuItem->rect,
+            QRect  vSubMenuRect = QProxyStyle::visualRect(option->direction, menuItem->rect,
                                             QRect(xpos, menuItem->rect.top() + menuItem->rect.height() / 2 - dim / 2, dim, dim));
             QStyleOptionMenuItem newMI = *menuItem;
             newMI.rect = vSubMenuRect;
