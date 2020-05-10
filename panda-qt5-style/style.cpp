@@ -121,7 +121,7 @@ void Style::polish(QPalette &palette)
     palette.setBrush(QPalette::Disabled, QPalette::WindowText, disableColor);
     palette.setBrush(QPalette::Disabled, QPalette::Text, disableColor);
     palette.setBrush(QPalette::Disabled, QPalette::BrightText,disableColor);
-    palette.setBrush(QPalette::PlaceholderText, disableColor);
+    // palette.setBrush(QPalette::PlaceholderText, disableColor);
 
     palette.setBrush(QPalette::Highlight, themeColor);
     palette.setBrush(QPalette::Active, QPalette::Highlight, themeColor);

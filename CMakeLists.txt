@@ -34,13 +34,25 @@ set (SRCS
     pandaplatformtheme.cpp
     hintsettings.h
     hintsettings.cpp
+    systemtrayicon.h
+    systemtrayicon.cpp
     qdbusmenubar_p.h
     qdbusmenubar.cpp
     x11integration.h
     x11integration.cpp
+    statusnotifier/dbustypes.h
+    statusnotifier/dbustypes.cpp
+    statusnotifier/statusnotifieritem.h
+    statusnotifier/statusnotifieritem.cpp
 )
 
 qt5_add_dbus_interface(SRCS org.kde.StatusNotifierWatcher.xml statusnotifierwatcher_interface)
+
+qt5_add_dbus_adaptor(SRCS
+    statusnotifier/org.kde.StatusNotifierItem.xml
+    statusnotifier/statusnotifieritem.h
+    StatusNotifierItem
+)
 
 add_library(panda-qtplugin MODULE ${SRCS})
 target_link_libraries(panda-qtplugin PRIVATE
@@ -49,6 +61,7 @@ target_link_libraries(panda-qtplugin PRIVATE
     Qt5::Widgets
     Qt5::Core
     Qt5::DBus
+    dbusmenu-qt5
     
     KF5::WindowSystem
     ${XCB_LIBRARIES}
