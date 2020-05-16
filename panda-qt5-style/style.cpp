@@ -102,7 +102,7 @@ void Style::unpolish(QWidget *w)
 
 void Style::polish(QApplication *app)
 {
-    QFont font("Ubuntu");
+    QFont font("Noto Mono");
     font.setPixelSize(15);
     app->setFont(font);
 }
