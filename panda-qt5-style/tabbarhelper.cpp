@@ -82,13 +82,14 @@ bool Style::drawTabBar(QPainter *painter,  const QStyleOptionTab *tab, const QWi
     }
 
     QColor lineColor = !isTriangularMode || selected ? Qt::transparent : QColor(Qt::red);
-    QColor tabFrameColor = selected ? Qt::transparent : Qt::green;
+    QColor tabFrameColor = selected ? Qt::transparent : Qt::transparent;
 
-    if (!(tab->features & QStyleOptionTab::HasFrame))
-        tabFrameColor = QColor(0, 0, 0, 100);
+    // if (!(tab->features & QStyleOptionTab::HasFrame))
+    //     tabFrameColor = QColor(0, 0, 0, 100);
 
-    if (!isTriangularMode)
-        tabFrameColor = selected ? QColor(0, 0, 0, 60) : Qt::transparent;
+    if (!isTriangularMode) {
+        tabFrameColor = selected ? tab->palette.color(QPalette::Highlight) : Qt::transparent;
+    }
 
     QPen outlinePen(lineColor, proxy()->pixelMetric(PM_DefaultFrameWidth, tab, widget));
     QRect drawRect = rect;
@@ -136,7 +137,7 @@ bool Style::drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const
     qreal stop = qreal(tr.right() - close_button_width - textRect.x() - 5) / textRect.width();
 
     if (selected) {
-        painter->setPen(QColor(0, 0, 0, 230));
+        painter->setPen(QColor(255, 255, 255));
     } else {
         painter->setPen(QColor(0, 0, 0, 180));
     }
@@ -144,9 +145,9 @@ bool Style::drawTabBarLabel(QPainter *painter, const QStyleOptionTab *tab, const
     QFont font = painter->font();
     font.setBold(false);
     painter->setFont(font);
-    // painter->drawText(textRect, Qt::AlignCenter | Qt::TextShowMnemonic, tab->text);
+    painter->drawText(textRect, Qt::AlignCenter | Qt::TextShowMnemonic, tab->text);
 
-    QProxyStyle::drawControl(CE_TabBarTabLabel, tab, painter, widget);
+    // QProxyStyle::drawControl(CE_TabBarTabLabel, tab, painter, widget);
 
     return true;
 }
