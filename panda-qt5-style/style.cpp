@@ -137,6 +137,11 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         break;
     }
 
+    case PE_FrameTabBarBase: {
+        // 不繪畫tabbar邊框
+        break;
+    }
+
     case PE_FrameTabWidget: {
         painter->setPen(Qt::NoPen);
         painter->setBrush(Qt::transparent);
