@@ -596,9 +596,15 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
                     }
                     tr.translate(shiftX, shiftY);
                     const QString text = toolButtonElideText(toolbutton, tr, alignment);
+                    if (toolbutton->state & State_On) {
+                        painter->setPen(opt->palette.color(QPalette::HighlightedText));
+                    }
+
+                    if (!(toolbutton->state & State_Enabled))
+                        painter->setPen(opt->palette.color(QPalette::Disabled, QPalette::ButtonText));
+
                     proxy()->drawItemText(painter, QStyle::visualRect(opt->direction, rect, tr), alignment, toolbutton->palette,
-                                          toolbutton->state & State_Enabled, text,
-                                          QPalette::ButtonText);
+                                          toolbutton->state & State_Enabled, text);
                 } else {
                     rect.translate(shiftX, shiftY);
                     if (hasArrow) {
