@@ -186,6 +186,8 @@ private:
     QRect scrollBarInternalSubControlRect(const QStyleOptionComplex *option, SubControl subControl) const;
     QRect scrollBarSubControlRect(const QStyleOptionComplex *option, SubControl subControl, const QWidget *widget) const;
 
+    void drawPanelButtonCommandPrimitive(const QStyleOption* option, QPainter* painter, const QWidget* widget) const;
+
     // utils
     QString calculateElidedText(const QString &text, const QTextOption &textOption,
                                 const QFont &font, const QRect &textRect, const Qt::Alignment valign,

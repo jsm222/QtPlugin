@@ -22,7 +22,7 @@ static QColor mergedColors(const QColor &colorA, const QColor &colorB, int facto
     return tmp;
 }
 
-static QColor outline(const QPalette &pal) 
+static QColor outline(const QPalette &pal)
 {
     if (pal.window().style() == Qt::TexturePattern)
         return QColor(0, 0, 0, 160);
@@ -30,7 +30,7 @@ static QColor outline(const QPalette &pal)
     return pal.window().color().darker(140);
 }
 
-static QColor highlightedOutline(const QPalette &pal) 
+static QColor highlightedOutline(const QPalette &pal)
 {
     QColor highlightedOutline = pal.color(QPalette::Highlight).darker(125);
     if (highlightedOutline.value() > 160)
@@ -38,7 +38,7 @@ static QColor highlightedOutline(const QPalette &pal)
     return highlightedOutline;
 }
 
-Style::Style() 
+Style::Style()
     : QProxyStyle("fusion"),
       m_blurHelper(new BlurHelper(this))
 {
@@ -331,26 +331,7 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         break;
 
     case PE_PanelButtonCommand: {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor(242, 242, 242));
-
-        if (widget->property("ENABLE_TRANSPARENT").toBool())
-            painter->setBrush(Qt::transparent);
-
-        if (option->state & State_MouseOver) {
-            // press
-            if (option->state & State_Sunken) {
-                painter->setBrush(QColor(204, 204, 204));
-            } else {
-            // hover
-                painter->setBrush(QColor(224, 224, 224));
-            }
-        }
-        painter->drawRoundedRect(option->rect,6, 6);
-        painter->restore();
-        break;
+        return drawPanelButtonCommandPrimitive(option, painter, widget);
     }
 
     default:
@@ -368,6 +349,10 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
                 return;
         }
         break;
+
+    case CE_PushButtonBevel: {
+        return drawPanelButtonCommandPrimitive(opt, painter, widget);
+    }
 
     case CE_TabBarTabLabel:
         if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(opt)) {
@@ -575,7 +560,7 @@ void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex
 
 void setWidgetAttribute(const QWidget *w)
 {
-    if (!w || w->testAttribute(Qt::WA_WState_Created)) 
+    if (!w || w->testAttribute(Qt::WA_WState_Created))
         return;
 
     if (auto menu = qobject_cast<const QMenu *>(w)) {

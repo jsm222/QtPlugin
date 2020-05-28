@@ -24,6 +24,7 @@ set (SRCS
     style.cpp
     styleutils.cpp
     tabbarhelper.cpp
+    buttonhelper.cpp
     blurhelper.cpp
     menuhelper.cpp
     styleanimation.h
@@ -32,7 +33,7 @@ set (SRCS
 )
 
 add_library(${TARGET} MODULE ${SRCS})
-target_link_libraries(${TARGET} 
+target_link_libraries(${TARGET}
     Qt5::GuiPrivate
     Qt5::Core
     Qt5::Gui
