@@ -132,3 +132,21 @@ void Style::viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, co
     viewItemTextLayout(textLayout, textRect.width());
     textLayout.draw(p, paintPosition);
 }
+
+QString Style::toolButtonElideText(const QStyleOptionToolButton *option,
+                                                 const QRect &textRect, int flags) const
+{
+    if (option->fontMetrics.horizontalAdvance(option->text) <= textRect.width())
+        return option->text;
+
+    QString text = option->text;
+    text.replace('\n', QChar::LineSeparator);
+    QTextOption textOption;
+    textOption.setWrapMode(QTextOption::ManualWrap);
+    textOption.setTextDirection(option->direction);
+
+    return calculateElidedText(text, textOption,
+                               option->font, textRect, Qt::AlignTop,
+                               Qt::ElideMiddle, flags,
+                               false, nullptr);
+}

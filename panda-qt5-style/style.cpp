@@ -12,6 +12,36 @@
 
 static const QByteArray s_blurBehindPropertyName = QByteArrayLiteral("ENABLE_BLUR_BEHIND_HINT");
 
+static QWindow *qt_getWindow(const QWidget *widget)
+{
+    return widget ? widget->window()->windowHandle() : 0;
+}
+
+static void drawArrow(const QStyle *style, const QStyleOptionToolButton *toolbutton,
+                      const QRect &rect, QPainter *painter, const QWidget *widget = nullptr)
+{
+    QStyle::PrimitiveElement pe;
+    switch (toolbutton->arrowType) {
+    case Qt::LeftArrow:
+        pe = QStyle::PE_IndicatorArrowLeft;
+        break;
+    case Qt::RightArrow:
+        pe = QStyle::PE_IndicatorArrowRight;
+        break;
+    case Qt::UpArrow:
+        pe = QStyle::PE_IndicatorArrowUp;
+        break;
+    case Qt::DownArrow:
+        pe = QStyle::PE_IndicatorArrowDown;
+        break;
+    default:
+        return;
+    }
+    QStyleOption arrowOpt = *toolbutton;
+    arrowOpt.rect = rect;
+    style->drawPrimitive(pe, &arrowOpt, painter, widget);
+}
+
 static QColor mergedColors(const QColor &colorA, const QColor &colorB, int factor = 50)
 {
     const int maxFactor = 100;
@@ -124,6 +154,7 @@ void Style::polish(QPalette &palette)
     // palette.setBrush(QPalette::PlaceholderText, disableColor);
 
     palette.setBrush(QPalette::Highlight, themeColor);
+    palette.setBrush(QPalette::HighlightedText, Qt::white);
     palette.setBrush(QPalette::Active, QPalette::Highlight, themeColor);
 }
 
@@ -334,6 +365,10 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         return drawPanelButtonCommandPrimitive(option, painter, widget);
     }
 
+    case PE_PanelButtonTool: {
+        return drawPanelButtonToolPrimitive(option, painter, widget);
+    }
+
     default:
         QProxyStyle::drawPrimitive(element, option, painter, widget);
         break;
@@ -484,6 +519,99 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
         break;
     }
 
+    case CE_ToolButtonLabel: {
+        if (const QStyleOptionToolButton *toolbutton
+            = qstyleoption_cast<const QStyleOptionToolButton *>(opt)) {
+            QRect rect = toolbutton->rect;
+            int shiftX = 0;
+            int shiftY = 0;
+            if (toolbutton->state & (State_Sunken | State_On)) {
+                shiftX = proxy()->pixelMetric(PM_ButtonShiftHorizontal, toolbutton, widget);
+                shiftY = proxy()->pixelMetric(PM_ButtonShiftVertical, toolbutton, widget);
+            }
+            // Arrow type always overrules and is always shown
+            bool hasArrow = toolbutton->features & QStyleOptionToolButton::Arrow;
+            if (((!hasArrow && toolbutton->icon.isNull()) && !toolbutton->text.isEmpty())
+                || toolbutton->toolButtonStyle == Qt::ToolButtonTextOnly) {
+                int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
+                if (!proxy()->styleHint(SH_UnderlineShortcut, opt, widget))
+                    alignment |= Qt::TextHideMnemonic;
+                rect.translate(shiftX, shiftY);
+                painter->setFont(toolbutton->font);
+
+                if (toolbutton->state & State_On) {
+                    painter->setPen(opt->palette.color(QPalette::HighlightedText));
+                }
+
+                if (!(toolbutton->state & State_Enabled))
+                    painter->setPen(opt->palette.color(QPalette::Disabled, QPalette::ButtonText));
+
+                proxy()->drawItemText(painter, rect, alignment, toolbutton->palette,
+                                      opt->state & State_Enabled, toolbutton->text);
+            } else {
+                QPixmap pm;
+                QSize pmSize = toolbutton->iconSize;
+                if (!toolbutton->icon.isNull()) {
+                    QIcon::State state = toolbutton->state & State_On ? QIcon::On : QIcon::Off;
+                    QIcon::Mode mode;
+                    if (!(toolbutton->state & State_Enabled))
+                        mode = QIcon::Disabled;
+                    else if ((opt->state & State_MouseOver) && (opt->state & State_AutoRaise))
+                        mode = QIcon::Active;
+                    else
+                        mode = QIcon::Normal;
+                    pm = toolbutton->icon.pixmap(qt_getWindow(widget), toolbutton->rect.size().boundedTo(toolbutton->iconSize),
+                                                 mode, state);
+                    pmSize = pm.size() / pm.devicePixelRatio();
+                }
+
+                if (toolbutton->toolButtonStyle != Qt::ToolButtonIconOnly) {
+                    painter->setFont(toolbutton->font);
+                    QRect pr = rect,
+                        tr = rect;
+                    int alignment = Qt::TextShowMnemonic;
+                    if (!proxy()->styleHint(SH_UnderlineShortcut, opt, widget))
+                        alignment |= Qt::TextHideMnemonic;
+
+                    if (toolbutton->toolButtonStyle == Qt::ToolButtonTextUnderIcon) {
+                        pr.setHeight(pmSize.height() + 4); //### 4 is currently hardcoded in QToolButton::sizeHint()
+                        tr.adjust(0, pr.height() - 1, 0, -1);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            proxy()->drawItemPixmap(painter, pr, Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(proxy(), toolbutton, pr, painter, widget);
+                        }
+                        alignment |= Qt::AlignCenter;
+                    } else {
+                        pr.setWidth(pmSize.width() + 4); //### 4 is currently hardcoded in QToolButton::sizeHint()
+                        tr.adjust(pr.width(), 0, 0, 0);
+                        pr.translate(shiftX, shiftY);
+                        if (!hasArrow) {
+                            proxy()->drawItemPixmap(painter, QStyle::visualRect(opt->direction, rect, pr), Qt::AlignCenter, pm);
+                        } else {
+                            drawArrow(proxy(), toolbutton, pr, painter, widget);
+                        }
+                        alignment |= Qt::AlignLeft | Qt::AlignVCenter;
+                    }
+                    tr.translate(shiftX, shiftY);
+                    const QString text = toolButtonElideText(toolbutton, tr, alignment);
+                    proxy()->drawItemText(painter, QStyle::visualRect(opt->direction, rect, tr), alignment, toolbutton->palette,
+                                          toolbutton->state & State_Enabled, text,
+                                          QPalette::ButtonText);
+                } else {
+                    rect.translate(shiftX, shiftY);
+                    if (hasArrow) {
+                        drawArrow(proxy(), toolbutton, rect, painter, widget);
+                    } else {
+                        proxy()->drawItemPixmap(painter, rect, Qt::AlignCenter, pm);
+                    }
+                }
+            }
+        }
+        break;
+    }
+
     default:
         QProxyStyle::drawControl(element, opt, painter, widget);
         break;
@@ -552,6 +680,18 @@ void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex
         }
         break;
     }
+
+    // case CC_ToolButton: {
+    //     if (const QStyleOptionToolButton *buttonOption = qstyleoption_cast<const QStyleOptionToolButton *>(option)) {
+    //         QRect buttonRect = proxy()->subControlRect(control, buttonOption, SC_ToolButton, widget);
+    //         painter->save();
+    //         painter->setBrush(Qt::red);
+    //         painter->drawRect(buttonRect);
+    //         painter->restore();
+    //     }
+    //     break;
+    // }
+
     default:
         QProxyStyle::drawComplexControl(control, option, painter, widget);
         break;

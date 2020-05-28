@@ -187,6 +187,7 @@ private:
     QRect scrollBarSubControlRect(const QStyleOptionComplex *option, SubControl subControl, const QWidget *widget) const;
 
     void drawPanelButtonCommandPrimitive(const QStyleOption* option, QPainter* painter, const QWidget* widget) const;
+    void drawPanelButtonToolPrimitive(const QStyleOption* option, QPainter* painter, const QWidget* widget) const;
 
     // utils
     QString calculateElidedText(const QString &text, const QTextOption &textOption,
@@ -194,6 +195,8 @@ private:
                                 Qt::TextElideMode textElideMode, int flags,
                                 bool lastVisibleLineShouldBeElided, QPointF *paintStartPosition) const;
     void viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, const QRect &rect) const;
+    QString toolButtonElideText(const QStyleOptionToolButton *toolbutton,
+                                const QRect &textRect, int flags) const;
 
 private:
     BlurHelper *m_blurHelper;
