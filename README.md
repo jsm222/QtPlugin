@@ -1,6 +1,3 @@
-libqt5xdgiconloader-dev libdbusmenu-qt5-dev qtbase5-private-dev libxcb-ewmh-dev
-
-
 # Panda Qt5 Plugin
 
 Unify Qt application style of pandaOS.
