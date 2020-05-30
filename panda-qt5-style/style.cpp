@@ -168,6 +168,24 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
         break;
     }
 
+    case PE_IndicatorItemViewItemDrop: {
+        const qreal radius = Frame_FrameRadius;
+        QRect rect(option->rect.adjusted(radius, radius, -radius, -radius));
+        if (rect.height() > 0) {
+            painter->save();
+            QColor color(option->palette.color(QPalette::Highlight));
+            painter->setPen(color);
+            painter->setBrush(QColor(color.red(), color.green(), color.blue(), 60));
+
+            if (rect.height() > 0) {
+                painter->drawRoundedRect(rect, radius, radius);
+            }
+
+            painter->restore();
+        }
+        break;
+    }
+
     case PE_FrameTabBarBase: {
         // 不繪畫tabbar邊框
         break;
@@ -704,7 +722,7 @@ void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex
     }
 }
 
-void setWidgetAttribute(const QWidget *w)
+static void setAttribute(const QWidget *w)
 {
     if (!w || w->testAttribute(Qt::WA_WState_Created))
         return;
@@ -720,7 +738,7 @@ void setWidgetAttribute(const QWidget *w)
 
 int Style::styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const
 {
-    setWidgetAttribute(w);
+    setAttribute(w);
 
     switch (sh) {
     case SH_ComboBox_Popup:
