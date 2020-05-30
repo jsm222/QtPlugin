@@ -292,10 +292,10 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
     case PE_PanelItemViewItem: {
         if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
             QPalette::ColorGroup cg = (widget ? widget->isEnabled() : (vopt->state & QStyle::State_Enabled))
-                                      ? QPalette::Normal : QPalette::Disabled;
+                ? QPalette::Normal : QPalette::Disabled;
             if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
                 cg = QPalette::Inactive;
-            bool isIconView = (vopt->decorationPosition & QStyleOptionViewItem::Top);
+            const bool isIconView = (vopt->decorationPosition & QStyleOptionViewItem::Top);
 
             if (vopt->state & QStyle::State_Selected) {
                 painter->save();
@@ -304,7 +304,7 @@ void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *
                 painter->setBrush(vopt->palette.brush(cg, QPalette::Highlight));
 
                 if (isIconView)
-                    painter->drawRoundedRect(option->rect, 6, 6);
+                    painter->drawRoundedRect(option->rect, Frame_FrameRadius, Frame_FrameRadius);
                 else
                     painter->drawRect(option->rect);
 
@@ -530,10 +530,29 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
 
     // table header style.
     case CE_HeaderSection: {
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
-        painter->fillRect(opt->rect, opt->palette.alternateBase().color());
-        painter->restore();
+        const auto headerOption(qstyleoption_cast<const QStyleOptionHeader*>(opt));
+        if (!headerOption) return;
+        const bool horizontal(headerOption->orientation == Qt::Horizontal);
+        const bool isLast(headerOption->position == QStyleOptionHeader::End);
+
+        // draw background
+        painter->fillRect(opt->rect, QBrush(opt->palette.alternateBase().color()));
+
+        // draw line
+        QColor lineColor(opt->palette.alternateBase().color().darker(110));
+        painter->setPen(lineColor);
+        if (horizontal) {
+            if (!isLast) {
+                QPoint unit(0, opt->rect.height() / 5);
+                painter->drawLine(opt->rect.topRight() + unit, opt->rect.bottomRight() - unit);
+            }
+            painter->drawLine(opt->rect.bottomLeft(), opt->rect.bottomRight());
+        } else {
+            if (!isLast) {
+                painter->drawLine(opt->rect.bottomLeft(), opt->rect.bottomRight());
+            }
+            painter->drawLine(opt->rect.topRight(), opt->rect.bottomRight());
+        }
         break;
     }
 
@@ -652,6 +671,16 @@ QRect Style::subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex
     default:
         return QProxyStyle::subControlRect(cc, option, sc, widget);
     }
+}
+
+QRect Style::subElementRect(QStyle::SubElement r, const QStyleOption *opt, const QWidget *widget) const
+{
+    switch (r) {
+    default:
+        break;
+    }
+
+    return QProxyStyle::subElementRect(r, opt, widget);
 }
 
 void Style::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
