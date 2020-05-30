@@ -18,10 +18,13 @@ void Style::drawPanelButtonCommandPrimitive(const QStyleOption* option, QPainter
         const bool flat(buttonOption->features & QStyleOptionButton::Flat);
         const qreal radius(Style::Frame_FrameRadius);
 
+        painter->save();
         painter->setRenderHint(QPainter::Antialiasing, true);
+        painter->translate(0.5, 0.5);
+        painter->fillRect(rect, Qt::transparent);
         painter->setPen(Qt::NoPen);
         painter->setBrush(QColor(242, 242, 242));
-        const QRectF baseRect( rect.adjusted( 1, 1, -1, -1 ) );
+        const QRectF baseRect(rect.adjusted(0, 0, -radius / 2, -radius / 2));
 
         if (state & State_MouseOver) {
             if (sunken) {
@@ -35,10 +38,11 @@ void Style::drawPanelButtonCommandPrimitive(const QStyleOption* option, QPainter
 
         // focus outline
         if (hasFocus) {
-            painter->setPen(option->palette.highlight().color());
+            painter->setPen(option->palette.color(QPalette::Highlight));
         }
 
         painter->drawRoundedRect(baseRect, radius, radius);
+        painter->restore();
     }
 }
 

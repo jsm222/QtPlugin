@@ -98,7 +98,7 @@ bool Style::drawTabBar(QPainter *painter,  const QStyleOptionTab *tab, const QWi
     painter->setRenderHint(QPainter::Antialiasing, true);
 
     if (!isTriangularMode) {
-        int radius = 6;
+        int radius = Frame_FrameRadius;
         int border = 2;
         painter->drawRoundedRect(drawRect.adjusted(border, border, -border, -border), radius, radius);
     } else {
