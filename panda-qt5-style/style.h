@@ -163,7 +163,6 @@ public:
     QRect subElementRect(QStyle::SubElement r, const QStyleOption *opt, const QWidget *widget = nullptr) const;
     void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
                                       QPainter *painter, const QWidget *widget) const;
-
     int styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const;
     int pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
 

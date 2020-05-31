@@ -52,6 +52,7 @@ void Style::drawPanelButtonToolPrimitive(const QStyleOption* option, QPainter* p
     const State &state(option->state);
     const bool sunken(state & (State_On | State_Sunken));
     const qreal radius(Style::Frame_FrameRadius);
+    const QRectF baseRect(rect.adjusted(0, 0, -radius / 2, -radius / 2));
 
     if (state & State_On) {
         painter->setBrush(option->palette.highlight().color());
@@ -62,6 +63,6 @@ void Style::drawPanelButtonToolPrimitive(const QStyleOption* option, QPainter* p
     painter->save();
     painter->setPen(Qt::NoPen);
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->drawRoundedRect(option->rect, radius, radius);
+    painter->drawRoundedRect(baseRect, radius, radius);
     painter->restore();
 }
