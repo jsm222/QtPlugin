@@ -444,16 +444,17 @@ void Style::drawControl(QStyle::ControlElement element, const QStyleOption *opt,
 
         if (horizontal) {
             handleRect = rect.adjusted(0, 6, 0, 2);
-            handleRect.adjust(0, -6.0 * opacity, 0, -2.0 * opacity);
+            handleRect.adjust(3, -6.0 * opacity, -6, -2.0 * opacity);
         } else {
             handleRect = rect.adjusted(6, 0, 2, 0);
-            handleRect.adjust(-6.0 * opacity, 0, -2.0 * opacity, 0);
+            handleRect.adjust(-6.0 * opacity, 2, -2.0 * opacity, -4);
         }
 
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing, true);
         qreal metric(handleRect.width() < handleRect.height() ? handleRect.width() : handleRect.height());
         qreal radius(0.5 * metric);
+
         painter->setPen(Qt::NoPen);
         painter->setOpacity(opacity);
         painter->setBrush(opt->palette.windowText());
