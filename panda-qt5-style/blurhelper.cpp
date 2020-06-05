@@ -7,8 +7,9 @@
 #include <QWidget>
 #include <QVariant>
 #include <QEvent>
+#include <QPainterPath>
 
-BlurHelper::BlurHelper(QObject *parent) 
+BlurHelper::BlurHelper(QObject *parent)
     : QObject(parent),
       m_timer(new QTimer(this)),
       m_blurEnable(true)

@@ -9,6 +9,7 @@
 #include <QAbstractItemView>
 #include <QFontMetrics>
 #include <QPainter>
+#include <QPainterPath>
 
 static const QByteArray s_blurBehindPropertyName = QByteArrayLiteral("ENABLE_BLUR_BEHIND_HINT");
 
