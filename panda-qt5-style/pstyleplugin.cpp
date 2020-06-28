@@ -5,12 +5,16 @@
 #include <QStyleFactory>
 #include <QDebug>
 
-ProxyStylePlugin::ProxyStylePlugin()
+QStringList ProxyStylePlugin::keys() const
 {
-    qDebug() << "init panda style plugin";
+    return {"panda"};
 }
 
 QStyle *ProxyStylePlugin::create(const QString &key)
 {
+    if (key != QStringLiteral("panda")) {
+        return nullptr;
+    }
+
     return new Style;
 }

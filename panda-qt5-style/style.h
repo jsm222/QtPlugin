@@ -151,20 +151,21 @@ public:
 public:
     explicit Style();
 
-    void polish(QWidget *w);
-    void unpolish(QWidget *w);
-    void polish(QApplication *app);
+    void polish(QWidget *w) override;
+    void unpolish(QWidget *w) override;
+    void polish(QApplication *app) override;
+    void polish(QPalette &palette) override;
 
-    void polish(QPalette &palette);
+    QPalette standardPalette() const override;
 
-    void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
-    void drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const;
-    QRect subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *opt, QStyle::SubControl sc, const QWidget *w) const;
-    QRect subElementRect(QStyle::SubElement r, const QStyleOption *opt, const QWidget *widget = nullptr) const;
+    void drawPrimitive(QStyle::PrimitiveElement pe, const QStyleOption *option, QPainter *painter, const QWidget *widget) const override;
+    void drawControl(QStyle::ControlElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const override;
+    QRect subControlRect(QStyle::ComplexControl cc, const QStyleOptionComplex *opt, QStyle::SubControl sc, const QWidget *w) const override;
+    QRect subElementRect(QStyle::SubElement r, const QStyleOption *opt, const QWidget *widget = nullptr) const override;
     void drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
-                                      QPainter *painter, const QWidget *widget) const;
-    int styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const;
-    int pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const;
+                                      QPainter *painter, const QWidget *widget) const override;
+    int styleHint(QStyle::StyleHint sh, const QStyleOption *opt, const QWidget *w, QStyleHintReturn *shret) const override;
+    int pixelMetric(QStyle::PixelMetric metric, const QStyleOption *option, const QWidget *widget) const override;
 
 private:
     QRect centerRect(const QRect &rect, int width, int height) const {

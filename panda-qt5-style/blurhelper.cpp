@@ -1,3 +1,33 @@
+//////////////////////////////////////////////////////////////////////////////
+// breezeblurhelper.cpp
+// handle regions passed to kwin for blurring
+// -------------------
+//
+// Copyright (C) 2018 Alex Nemeth <alex.nemeth329@gmail.com>
+//
+// Largely rewritten from Oxygen widget style
+// Copyright (C) 2007 Thomas Luebking <thomas.luebking@web.de>
+// Copyright (c) 2010 Hugo Pereira Da Costa <hugo.pereira@free.fr>
+//
+// Permission is hereby granted, free of charge, to any person obtaining a copy
+// of this software and associated documentation files (the "Software"), to
+// deal in the Software without restriction, including without limitation the
+// rights to use, copy, modify, merge, publish, distribute, sublicense, and/or
+// sell copies of the Software, and to permit persons to whom the Software is
+// furnished to do so, subject to the following conditions:
+//
+// The above copyright notice and this permission notice shall be included in
+// all copies or substantial portions of the Software.
+//
+// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+// FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS
+// IN THE SOFTWARE.
+//////////////////////////////////////////////////////////////////////////////
+
 #include "blurhelper.h"
 
 // KF5
@@ -10,125 +40,69 @@
 #include <QPainterPath>
 
 BlurHelper::BlurHelper(QObject *parent)
-    : QObject(parent),
-      m_timer(new QTimer(this)),
-      m_blurEnable(true)
+    : QObject(parent)
 {
-    m_timer->setSingleShot(true);
-    m_timer->setInterval(1000);
-}
-
-bool BlurHelper::eventFilter(QObject *obj, QEvent *e)
-{
-    if (!m_blurEnable)
-        return false;
-
-    QWidget *widget = qobject_cast<QWidget *>(obj);
-    if (widget->winId() <= 0)
-        return false;
-
-    switch (e->type()) {
-    case QEvent::UpdateRequest: {
-        delayUpdate(widget, true);
-        break;
-    }
-    case QEvent::LayoutRequest: {
-        delayUpdate(widget);
-        break;
-    }
-    case QEvent::Hide: {
-        KWindowEffects::enableBlurBehind(widget->winId(), false);
-    }
-    default: break;
-    }
-
-    return false;
 }
 
 void BlurHelper::registerWidget(QWidget *widget)
 {
-    if (shouldSkip(widget))
-        return;
+    // install event filter
+    addEventFilter(widget);
 
-    if (!m_blurList.contains(widget)) {
-        m_blurList << widget;
-        connect(widget, &QWidget::destroyed, this, [=] { unregisterWidget(widget); });
-    }
-
-    widget->removeEventFilter(this);
-    widget->installEventFilter(this);
-
-    if (!widget->mask().isEmpty()) {
-        widget->update(widget->mask());
-    } else {
-        widget->update();
-    }
+    // schedule shadow area repaint
+    update(widget);
 }
 
 void BlurHelper::unregisterWidget(QWidget *widget)
 {
-    if (shouldSkip(widget))
-        return;
-
-    m_blurList.removeOne(widget);
+    // remove event filter
     widget->removeEventFilter(this);
-    KWindowEffects::enableBlurBehind(widget->winId(), false);
 }
 
-bool BlurHelper::shouldSkip(QWidget *w)
+bool BlurHelper::eventFilter(QObject *object, QEvent *event)
 {
-    bool skip = false;
-    if (w->inherits("QComboBoxPrivateContainer"))
-        return true;
+    switch (event->type()) {
+    case QEvent::Hide:
+    case QEvent::Show:
+    case QEvent::Resize: {
+        // cast to widget and check
+        QWidget *widget(qobject_cast<QWidget*>(object));
 
-    return skip;
+        if (!widget)
+            break;
+
+        update(widget);
+        break;
+    }
+
+    default: break;
+    }
+
+    // never eat events
+    return false;
 }
 
-void BlurHelper::delayUpdate(QWidget *w, bool updateBlurRegionOnly)
+
+void BlurHelper::update(QWidget *widget) const
 {
-    if (w->winId() <= 0)
+    /*
+      directly from bespin code. Supposedly prevent playing with some 'pseudo-widgets'
+      that have winId matching some other -random- window
+    */
+    if (!(widget->testAttribute(Qt::WA_WState_Created) || widget->internalWinId()))
         return;
 
-    m_updateList.append(w);
-    if (!m_timer->isActive()) {
-        for (auto widget : m_updateList) {
-            if (!widget)
-                continue;
-
-            if (widget->winId() <= 0)
-                continue;
-
-            bool hasMask = false;
-            if (widget->mask().isNull())
-                hasMask = true;
-
-            QVariant regionValue = widget->property("blurRegion");
-            QRegion region = qvariant_cast<QRegion>(regionValue);
-
-            if (widget->inherits("QMenu")) {
-                QPainterPath path;
-                path.addRoundedRect(widget->rect().adjusted(9, 9, -9, -9), 10, 10);
-                KWindowEffects::enableBlurBehind(widget->winId(), true, path.toFillPolygon().toPolygon());
-                if (!updateBlurRegionOnly)
-                    widget->update();
-                break;
-            }
-
-            if (!hasMask && region.isEmpty())
-                break;
-
-            if (!region.isEmpty()) {
-                KWindowEffects::enableBlurBehind(widget->winId(), true, region);
-                if (!updateBlurRegionOnly)
-                    widget->update();
-            } else {
-                KWindowEffects::enableBlurBehind(widget->winId(), true, widget->mask());
-                if (!updateBlurRegionOnly)
-                    widget->update(widget->mask());
-            }
-        }
-        m_updateList.clear();
+    // 单独处理 QMenu
+    if (widget->inherits("QMenu")) {
+        QPainterPath path;
+        path.addRoundedRect(widget->rect().adjusted(9, 9, -9, -9), 10, 10);
+        KWindowEffects::enableBlurBehind(widget->winId(), true, path.toFillPolygon().toPolygon());
     } else {
-        m_timer->start();
+        KWindowEffects::enableBlurBehind(widget->winId(), true);
+    }
+
+    // force update
+    if (widget->isVisible()) {
+        widget->update();
     }
 }

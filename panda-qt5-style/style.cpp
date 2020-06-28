@@ -133,6 +133,8 @@ void Style::unpolish(QWidget *w)
 
 void Style::polish(QApplication *app)
 {
+    QProxyStyle::polish(app);
+
     QFont font("Noto Mono");
     font.setPixelSize(15);
     app->setFont(font);
@@ -140,23 +142,66 @@ void Style::polish(QApplication *app)
 
 void Style::polish(QPalette &palette)
 {
-    QColor windowBg(255, 255, 255);
-    QColor fontColor(23, 23, 23);
-    QColor disableColor(150, 150, 150);
-    QColor themeColor(84, 156, 255);
+    QProxyStyle::polish(palette);
 
-    palette.setBrush(QPalette::Window, windowBg);
-    palette.setBrush(QPalette::WindowText, fontColor);
-    palette.setBrush(QPalette::Text, fontColor);
+//    QColor windowBg(255, 255, 255);
+//    QColor fontColor(23, 23, 23);
+//    QColor disableColor(150, 150, 150);
+//    QColor themeColor(84, 156, 255);
 
-    palette.setBrush(QPalette::Disabled, QPalette::WindowText, disableColor);
-    palette.setBrush(QPalette::Disabled, QPalette::Text, disableColor);
-    palette.setBrush(QPalette::Disabled, QPalette::BrightText, disableColor);
-    // palette.setBrush(QPalette::PlaceholderText, disableColor);
+//    palette.setBrush(QPalette::Window, windowBg);
+//    palette.setBrush(QPalette::WindowText, fontColor);
+//    palette.setBrush(QPalette::Text, fontColor);
 
-    palette.setBrush(QPalette::Highlight, themeColor);
-    palette.setBrush(QPalette::HighlightedText, Qt::white);
-    palette.setBrush(QPalette::Active, QPalette::Highlight, themeColor);
+//    palette.setBrush(QPalette::Disabled, QPalette::WindowText, disableColor);
+//    palette.setBrush(QPalette::Disabled, QPalette::Text, disableColor);
+//    palette.setBrush(QPalette::Disabled, QPalette::BrightText, disableColor);
+//    // palette.setBrush(QPalette::PlaceholderText, disableColor);
+
+//    palette.setBrush(QPalette::Highlight, themeColor);
+//    palette.setBrush(QPalette::HighlightedText, Qt::white);
+//    palette.setBrush(QPalette::Active, QPalette::Highlight, themeColor);
+}
+
+QPalette Style::standardPalette() const
+{
+    QColor backGround(255, 255, 255);
+    QColor light = backGround.lighter(150);
+    QColor mid(backGround.darker(130));
+    QColor midLight = mid.lighter(110);
+    QColor base = Qt::white;
+    QColor disabledBase(backGround);
+    QColor dark = backGround.darker(150);
+    QColor darkDisabled = QColor(209, 209, 209).darker(110);
+    QColor text = Qt::black;
+    QColor hightlightedText = Qt::white;
+    QColor disabledText = QColor(190, 190, 190);
+    QColor button = backGround;
+    QColor shadow = dark.darker(135);
+    QColor disabledShadow = shadow.lighter(150);
+    QColor placeholder = text;
+    placeholder.setAlpha(128);
+
+    QPalette fusionPalette(Qt::black, backGround, light, dark, mid, text, base);
+    fusionPalette.setBrush(QPalette::Midlight, midLight);
+    fusionPalette.setBrush(QPalette::Button, button);
+    fusionPalette.setBrush(QPalette::Shadow, shadow);
+    fusionPalette.setBrush(QPalette::HighlightedText, hightlightedText);
+
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::Text, disabledText);
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::WindowText, disabledText);
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::ButtonText, disabledText);
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::Base, disabledBase);
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::Dark, darkDisabled);
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::Shadow, disabledShadow);
+
+    fusionPalette.setBrush(QPalette::Active, QPalette::Highlight, QColor(48, 140, 198));
+    fusionPalette.setBrush(QPalette::Inactive, QPalette::Highlight, QColor(48, 140, 198));
+    fusionPalette.setBrush(QPalette::Disabled, QPalette::Highlight, QColor(145, 145, 145));
+
+    fusionPalette.setBrush(QPalette::PlaceholderText, placeholder);
+
+    return fusionPalette;
 }
 
 void Style::drawPrimitive(QStyle::PrimitiveElement element, const QStyleOption *option, QPainter *painter, const QWidget *widget) const

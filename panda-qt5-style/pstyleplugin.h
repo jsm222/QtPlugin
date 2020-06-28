@@ -9,8 +9,9 @@ class ProxyStylePlugin : public QStylePlugin
     Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QStyleFactoryInterface" FILE "pstyleplugin.json")
 
 public:
-    ProxyStylePlugin();
+    ProxyStylePlugin() = default;
 
+    QStringList keys() const;
     QStyle *create(const QString &key) override;
 };
 

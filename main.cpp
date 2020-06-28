@@ -4,7 +4,8 @@
 class KdePlatformThemePlugin : public QPlatformThemePlugin
 {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID "org.qt-project.Qt.QPA.QPlatformThemeFactoryInterface.5.1" FILE "panda.json")
+    Q_PLUGIN_METADATA(IID QPlatformThemeFactoryInterface_iid FILE "panda.json")
+
 public:
     KdePlatformThemePlugin(QObject *parent = nullptr)
         : QPlatformThemePlugin(parent) {}
