@@ -47,7 +47,9 @@ public:
     static QColor highlight(const QPalette &pal) {
     //    if (isMacSystemPalette(pal))
     //        return QColor(60, 140, 230);
-        return pal.color(QPalette::Highlight);
+    //    return pal.color(QPalette::Highlight);
+
+        return pal.highlight().color();
     }
 
     static QColor highlightedText(const QPalette &pal) {

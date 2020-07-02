@@ -9,6 +9,7 @@
 #include <QProgressBar>
 #include <QAbstractButton>
 #include <QPainterPath>
+#include <QApplication>
 #include <QMenu>
 
 enum Direction {
@@ -2449,6 +2450,8 @@ void ModernStyle::polish(QWidget *widget)
 void ModernStyle::polish(QApplication *app)
 {
     QCommonStyle::polish(app);
+
+    app->setPalette(standardPalette());
 }
 
 void ModernStyle::polish(QPalette &pal)
