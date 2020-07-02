@@ -110,6 +110,7 @@ QPalette ModernStyle::standardPalette() const
     QColor shadow = dark.darker(135);
     QColor disabledShadow = shadow.lighter(150);
     QColor placeholder = text;
+    QColor highlightColor(84, 156, 255);
     placeholder.setAlpha(128);
 
     QPalette fusionPalette(Qt::black, backGround, light, dark, mid, text, base);
@@ -125,9 +126,13 @@ QPalette ModernStyle::standardPalette() const
     fusionPalette.setBrush(QPalette::Disabled, QPalette::Dark, darkDisabled);
     fusionPalette.setBrush(QPalette::Disabled, QPalette::Shadow, disabledShadow);
 
-    fusionPalette.setBrush(QPalette::Active, QPalette::Highlight, QColor(48, 140, 198));
-    fusionPalette.setBrush(QPalette::Inactive, QPalette::Highlight, QColor(48, 140, 198));
+    fusionPalette.setBrush(QPalette::Highlight, highlightColor);
+    fusionPalette.setBrush(QPalette::Active, QPalette::Highlight, highlightColor);
+    fusionPalette.setBrush(QPalette::Inactive, QPalette::Highlight, highlightColor);
     fusionPalette.setBrush(QPalette::Disabled, QPalette::Highlight, QColor(145, 145, 145));
+
+    fusionPalette.setBrush(QPalette::Base, base);
+    fusionPalette.setBrush(QPalette::Window, base);
 
     fusionPalette.setBrush(QPalette::PlaceholderText, placeholder);
 
@@ -160,6 +165,46 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         }
         break;
     }
+    case PE_IndicatorHeaderArrow: {
+        if (const QStyleOptionHeader *header = qstyleoption_cast<const QStyleOptionHeader *>(option)) {
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing,true);
+            painter->setBrush(Qt::NoBrush);
+            if(option->state & State_Enabled){
+                painter->setPen(QPen(option->palette.foreground().color(), 1.1));
+                if (option->state & State_MouseOver) {
+                    painter->setPen(QPen(option->palette.color(QPalette::Highlight), 1.1));
+                }
+            }
+            else {
+                painter->setPen(QPen(option->palette.color(QPalette::Text), 1.1));
+            }
+            QPolygon points(5);
+            //Add 8 to center vertically
+            int x = option->rect.x() + 9;
+            int y = option->rect.y() + 9;
+
+            int w = 8;
+            int h =  4;
+            x += (option->rect.width() - w) / 2;
+            y += (option->rect.height() - h) / 2;
+            if (header->sortIndicator & QStyleOptionHeader::SortUp) {
+                points[0] = QPoint(x, y);
+                points[1] = QPoint(x + w / 2, y + h);
+                points[2] = QPoint(x + w / 2, y + h);
+                points[3] = QPoint(x + w, y);
+            } else if (header->sortIndicator & QStyleOptionHeader::SortDown) {
+                points[0] = QPoint(x, y + h);
+                points[1] = QPoint(x + w / 2, y);
+                points[2] = QPoint(x + w / 2, y);
+                points[3] = QPoint(x + w, y + h);
+            }
+            painter->drawLine(points[0],  points[1] );
+            painter->drawLine(points[2],  points[3] );
+            painter->restore();
+        }
+    }
+        break;
     // tabbar
     case PE_FrameTabBarBase:
         if (const QStyleOptionTabBarBase *tbb
@@ -214,10 +259,11 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
     case PE_PanelMenu:
     case PE_FrameMenu:
         painter->save();
-        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setRenderHint(QPainter::Antialiasing, QPainter::SmoothPixmapTransform);
     {
+        int radius = frameRadius;
         QPainterPath rectPath;
-        rectPath.addRoundedRect(option->rect.adjusted(9, 9, -9, -9), 10, 10);
+        rectPath.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
 
         QPixmap pixmap(option->rect.size());
         pixmap.fill(Qt::transparent);
@@ -229,7 +275,7 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         pixmapPainter.end();
 
         QImage img = pixmap.toImage();
-        qt_blurImage(img, 8, false, false);
+        qt_blurImage(img, 5, false, false);
 
         pixmap = QPixmap::fromImage(img);
         QPainter pixmapPainter2(&pixmap);
@@ -248,7 +294,7 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         QPainterPath path;
         QRegion region = widget->mask();
         if (region.isEmpty()) {
-            path.addRoundedRect(option->rect.adjusted(9, 9, -9, -9), 10, 10);
+            path.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
         } else {
             path.addRegion(region);
         }
@@ -507,7 +553,6 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
             }
             return;
         }
-
 
         bool isEnabled = option->state & State_Enabled;
         bool hasFocus = (option->state & State_HasFocus && option->state & State_KeyboardFocusChange);

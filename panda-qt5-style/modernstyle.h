@@ -21,7 +21,7 @@ public:
     ModernStyle();
     ~ModernStyle();
 
-    QPalette standardPalette () const override;
+    QPalette standardPalette() const override;
     void drawPrimitive(PrimitiveElement elem,
                            const QStyleOption *option,
                            QPainter *painter, const QWidget *widget = nullptr) const override;
