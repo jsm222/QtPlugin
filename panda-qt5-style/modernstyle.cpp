@@ -207,41 +207,8 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         break;
     // tabbar
     case PE_FrameTabBarBase:
-        if (const QStyleOptionTabBarBase *tbb
-                = qstyleoption_cast<const QStyleOptionTabBarBase *>(option)) {
-            painter->save();
-            painter->setPen(QPen(outline.lighter(110)));
-            switch (tbb->shape) {
-            case QTabBar::RoundedNorth: {
-                QRegion region(tbb->rect);
-                region -= tbb->selectedTabRect;
-                painter->drawLine(tbb->rect.topLeft(), tbb->rect.topRight());
-                painter->setClipRegion(region);
-                painter->setPen(option->palette.light().color());
-                painter->drawLine(tbb->rect.topLeft() + QPoint(0, 1), tbb->rect.topRight() + QPoint(0, 1));
-            }
-                break;
-            case QTabBar::RoundedWest:
-                painter->drawLine(tbb->rect.left(), tbb->rect.top(), tbb->rect.left(), tbb->rect.bottom());
-                break;
-            case QTabBar::RoundedSouth:
-                painter->drawLine(tbb->rect.left(), tbb->rect.bottom(),
-                                  tbb->rect.right(), tbb->rect.bottom());
-                break;
-            case QTabBar::RoundedEast:
-                painter->drawLine(tbb->rect.topRight(), tbb->rect.bottomRight());
-                break;
-            case QTabBar::TriangularNorth:
-            case QTabBar::TriangularEast:
-            case QTabBar::TriangularWest:
-            case QTabBar::TriangularSouth:
-                painter->restore();
-                QCommonStyle::drawPrimitive(elem, option, painter, widget);
-                return;
-            }
-            painter->restore();
-        }
-        return;
+        // 不画
+        break;
     case PE_Frame: {
         if (widget && widget->inherits("QComboBoxPrivateContainer")){
             QStyleOption copy = *option;
@@ -684,7 +651,50 @@ void ModernStyle::drawControl(ControlElement element, const QStyleOption *option
             painter->restore();
         }
         break;
+    case CE_ScrollBarSlider: {
+        const QStyleOptionSlider *sliderOption(qstyleoption_cast<const QStyleOptionSlider *>(option));
+        if (!sliderOption)
+            break;
 
+        const State &state(option->state);
+        bool horizontal(state & State_Horizontal);
+
+        // copy rect and palette
+        const QRect &rect(horizontal ? option->rect.adjusted(-1, 4, 0, -4) : option->rect.adjusted(4, -1, -4, 0));
+        //const QPalette &palette(option->palette);
+
+        // define handle rect
+        QRect handleRect;
+
+        bool enabled(state & State_Enabled);
+        bool mouseOver((state & State_Active) && enabled && (state & State_MouseOver));
+        //bool sunken(enabled && (state & (State_On | State_Sunken)));
+        qreal opacity;
+        if (mouseOver)
+            opacity = 0.7;
+        else
+            opacity = 0.2;
+
+        if (horizontal) {
+            handleRect = rect.adjusted(0, 6, 0, 2);
+            handleRect.adjust(3, -6.0 * opacity, -6, -2.0 * opacity);
+        } else {
+            handleRect = rect.adjusted(6, 0, 2, 0);
+            handleRect.adjust(-6.0 * opacity, 2, -2.0 * opacity, -4);
+        }
+
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing, true);
+        qreal metric(handleRect.width() < handleRect.height() ? handleRect.width() : handleRect.height());
+        qreal radius(0.5 * metric);
+
+        painter->setPen(Qt::NoPen);
+        painter->setOpacity(opacity);
+        painter->setBrush(option->palette.windowText());
+        painter->drawRoundedRect(handleRect, radius, radius);
+        painter->restore();
+        break;
+    }
     case CE_Splitter:
         {
             // Don't draw handle for single pixel splitters
