@@ -29,6 +29,7 @@
 //////////////////////////////////////////////////////////////////////////////
 
 #include "blurhelper.h"
+#include "modernstyle.h"
 
 // KF5
 #include <KWindowEffects>
@@ -95,7 +96,8 @@ void BlurHelper::update(QWidget *widget) const
     // 单独处理 QMenu
     if (widget->inherits("QMenu")) {
         QPainterPath path;
-        path.addRoundedRect(widget->rect().adjusted(9, 9, -9, -9), 10, 10);
+        const int radius = ModernStyle::frameRadius;
+        path.addRoundedRect(widget->rect().adjusted(radius, radius, -radius, -radius), radius, radius);
         KWindowEffects::enableBlurBehind(widget->winId(), true, path.toFillPolygon().toPolygon());
     } else {
         KWindowEffects::enableBlurBehind(widget->winId(), true);

@@ -1,5 +1,5 @@
 #include "pstyleplugin.h"
-#include "style.h"
+#include "modernstyle.h"
 
 #include <QApplication>
 #include <QStyleFactory>
@@ -16,5 +16,5 @@ QStyle *ProxyStylePlugin::create(const QString &key)
         return nullptr;
     }
 
-    return new Style;
+    return new ModernStyle;
 }

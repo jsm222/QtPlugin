@@ -17,19 +17,13 @@ find_package(KF5 REQUIRED WindowSystem)
 include(ECMQueryQmake)
 
 set (SRCS
-    pstyleplugin.h
-    pstyleplugin.cpp
-    global.h
-    style.h
-    style.cpp
-    styleutils.cpp
-    tabbarhelper.cpp
-    buttonhelper.cpp
     blurhelper.cpp
-    menuhelper.cpp
-    styleanimation.h
-    styleanimation.cpp
-    scrollbarhelper.cpp
+    blurhelper.h
+    modernstyle.cpp
+    modernstyle.h
+    pstyleplugin.cpp
+    pstyleplugin.h
+    stylehelper.h
 )
 
 add_library(${TARGET} MODULE ${SRCS})
