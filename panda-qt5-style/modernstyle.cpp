@@ -210,19 +210,7 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
     case PE_FrameTabBarBase:
         // 不画
         break;
-    case PE_Frame: {
-        if (widget && widget->inherits("QComboBoxPrivateContainer")){
-            QStyleOption copy = *option;
-            copy.state |= State_Raised;
-            proxy()->drawPrimitive(PE_PanelMenu, &copy, painter, widget);
-            break;
-        }
-        painter->save();
-        QPen thePen(outline.lighter(108));
-        thePen.setCosmetic(false);
-        painter->setPen(thePen);
-        painter->drawRect(option->rect.adjusted(0, 0, -1, -1));
-        painter->restore(); }
+    case PE_Frame:
         break;
     case PE_PanelMenu:
     case PE_FrameMenu:
@@ -299,6 +287,44 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         }
         painter->restore();
         break;
+    case PE_PanelItemViewItem: {
+        if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
+            QPalette::ColorGroup cg = (widget ? widget->isEnabled() : (vopt->state & QStyle::State_Enabled))
+                ? QPalette::Normal : QPalette::Disabled;
+            if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+                cg = QPalette::Inactive;
+            const bool isIconView = (vopt->decorationPosition & QStyleOptionViewItem::Top);
+
+            if (vopt->state & QStyle::State_Selected) {
+                painter->save();
+                painter->setRenderHint(QPainter::Antialiasing);
+                painter->setPen(Qt::transparent);
+                painter->setBrush(vopt->palette.brush(cg, QPalette::Highlight));
+
+                if (isIconView) {
+                    double radius = option->rect.height() * m_radiusRatio;
+                    painter->drawRoundedRect(option->rect, radius, radius);
+                }
+                else
+                    painter->drawRect(option->rect);
+
+                painter->restore();
+            } else {
+                if (vopt->backgroundBrush.style() != Qt::NoBrush) {
+                    QPointF oldBO = painter->brushOrigin();
+                    painter->setBrushOrigin(vopt->rect.topLeft());
+                    painter->fillRect(vopt->rect, vopt->backgroundBrush);
+                    painter->setBrushOrigin(oldBO);
+                }
+
+                if (vopt->state & QStyle::State_Selected) {
+                    QRect textRect = subElementRect(QStyle::SE_ItemViewItemText,  option, widget);
+                    painter->fillRect(textRect, vopt->palette.brush(cg, QPalette::Highlight));
+                }
+            }
+        }
+        break;
+    }
     case PE_IndicatorDockWidgetResizeHandle:
     {
         QStyleOption dockWidgetHandle = *option;
@@ -307,6 +333,23 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         proxy()->drawControl(CE_Splitter, &dockWidgetHandle, painter, widget);
     }
         break;
+    case PE_IndicatorItemViewItemDrop: {
+        const qreal radius = frameRadius;
+        QRect rect(option->rect.adjusted(radius, radius, -radius, -radius));
+        if (rect.height() > 0) {
+            painter->save();
+            QColor color(option->palette.color(QPalette::Highlight));
+            painter->setPen(color);
+            painter->setBrush(QColor(color.red(), color.green(), color.blue(), 60));
+
+            if (rect.height() > 0) {
+                painter->drawRoundedRect(rect, radius, radius);
+            }
+
+            painter->restore();
+        }
+        break;
+    }
     case PE_FrameWindow:
         painter->save();
     {
@@ -485,102 +528,52 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         }
         break;
     case PE_PanelButtonCommand:
-    {
-        bool isDefault = false;
-        bool isFlat = false;
-        bool isDown = (option->state & State_Sunken) || (option->state & State_On);
-        QRect r;
+        if (const QStyleOptionButton *buttonOption = qstyleoption_cast<const QStyleOptionButton* >(option)) {
+            // rect and palette
+            const auto &rect(option->rect);
 
-        if (const QStyleOptionButton *button = qstyleoption_cast<const QStyleOptionButton*>(option)) {
-            isDefault = (button->features & QStyleOptionButton::DefaultButton) && (button->state & State_Enabled);
-            isFlat = (button->features & QStyleOptionButton::Flat);
-        }
+            // button state
+            const State &state(option->state);
+            const bool enabled(state & State_Enabled);
+            const bool mouseOver(enabled && (state & State_MouseOver));
+            const bool hasFocus((enabled && (state & State_HasFocus)) && !(widget && widget->focusProxy()));
+            const bool sunken(state & (State_On|State_Sunken));
+            const bool flat(buttonOption->features & QStyleOptionButton::Flat);
+            const qreal radius = option->rect.height() * m_radiusRatio;
 
-        if (isFlat && !isDown) {
-            if (isDefault) {
-                r = option->rect.adjusted(0, 1, 0, -1);
-                painter->setPen(QPen(Qt::black));
-                const QLine lines[4] = {
-                    QLine(QPoint(r.left() + 2, r.top()),
-                    QPoint(r.right() - 2, r.top())),
-                    QLine(QPoint(r.left(), r.top() + 2),
-                    QPoint(r.left(), r.bottom() - 2)),
-                    QLine(QPoint(r.right(), r.top() + 2),
-                    QPoint(r.right(), r.bottom() - 2)),
-                    QLine(QPoint(r.left() + 2, r.bottom()),
-                    QPoint(r.right() - 2, r.bottom()))
-                };
-                painter->drawLines(lines, 4);
-                const QPoint points[4] = {
-                    QPoint(r.right() - 1, r.bottom() - 1),
-                    QPoint(r.right() - 1, r.top() + 1),
-                    QPoint(r.left() + 1, r.bottom() - 1),
-                    QPoint(r.left() + 1, r.top() + 1)
-                };
-                painter->drawPoints(points, 4);
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing, true);
+            painter->translate(0.5, 0.5);
+            painter->fillRect(rect, Qt::transparent);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(QColor(242, 242, 242));
+            const QRectF baseRect(rect.adjusted(0, 0, -radius / 2, -radius / 2));
+
+            if (state & State_MouseOver) {
+                if (sunken) {
+                    // press
+                    painter->setPen(option->palette.highlight().color());
+                    painter->setBrush(QColor(204, 204, 204));
+                } else {
+                    // hover
+                    painter->setBrush(QColor(224, 224, 224));
+                }
             }
-            return;
-        }
 
-        bool isEnabled = option->state & State_Enabled;
-        bool hasFocus = (option->state & State_HasFocus && option->state & State_KeyboardFocusChange);
-        QColor buttonColor = StyleHelper::buttonColor(option->palette);
+            // focus outline
+            if (hasFocus) {
+                painter->setPen(option->palette.color(QPalette::Highlight));
+            }
 
-        QColor darkOutline = outline;
-        if (hasFocus | isDefault) {
-            darkOutline = highlightedOutline;
-        }
-
-        if (isDefault)
-            buttonColor = mergedColors(buttonColor, highlightedOutline.lighter(130), 90);
-
-        //BEGIN_STYLE_PIXMAPCACHE(QStringLiteral("pushbutton-") + buttonColor.name(QColor::HexArgb))
-        r = rect.adjusted(0, 1, -1, 0);
-
-        painter->setRenderHint(QPainter::Antialiasing, true);
-        painter->translate(0.5, -0.5);
-
-        QLinearGradient gradient = qt_fusion_gradient(rect, (isEnabled && option->state & State_MouseOver ) ? buttonColor : buttonColor.darker(104));
-        painter->setPen(Qt::transparent);
-        painter->setBrush(isDown ? QBrush(buttonColor.darker(110)) : gradient);
-        painter->drawRoundedRect(r, 2.0, 2.0);
-        painter->setBrush(Qt::NoBrush);
-
-        // Outline
-        painter->setPen(!isEnabled ? QPen(darkOutline.lighter(115)) : QPen(darkOutline));
-        painter->drawRoundedRect(r, 2.0, 2.0);
-
-        painter->setPen(StyleHelper::innerContrastLine());
-        painter->drawRoundedRect(r.adjusted(1, 1, -1, -1), 2.0, 2.0);
-
-        //END_STYLE_PIXMAPCACHE
+            painter->drawRoundedRect(baseRect, radius, radius);
+            painter->restore();
         }
         break;
     case PE_FrameTabWidget:
         painter->save();
-        painter->fillRect(option->rect.adjusted(0, 0, -1, -1), tabFrameColor);
-        if (const QStyleOptionTabWidgetFrame *twf = qstyleoption_cast<const QStyleOptionTabWidgetFrame *>(option)) {
-            QColor borderColor = outline.lighter(110);
-            QRect rect = option->rect.adjusted(0, 0, -1, -1);
-
-            // Shadow outline
-            if (twf->shape != QTabBar::RoundedSouth) {
-                rect.adjust(0, 0, 0, -1);
-                QColor alphaShadow(Qt::black);
-                alphaShadow.setAlpha(15);
-                painter->setPen(alphaShadow);
-                painter->drawLine(option->rect.bottomLeft(), option->rect.bottomRight());            painter->setPen(borderColor);
-            }
-
-            // outline
-            painter->setPen(outline);
-            painter->drawRect(rect);
-
-            // Inner frame highlight
-            painter->setPen(StyleHelper::innerContrastLine());
-            painter->drawRect(rect.adjusted(1, 1, -1, -1));
-
-        }
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(Qt::transparent);
+        painter->drawRect(option->rect);
         painter->restore();
         break ;
 
@@ -1360,6 +1353,71 @@ void ModernStyle::drawControl(ControlElement element, const QStyleOption *option
         }
         painter->restore();
         break;
+    case CE_ItemViewItem:
+        if (const QStyleOptionViewItem *vopt = qstyleoption_cast<const QStyleOptionViewItem *>(option)) {
+            painter->save();
+            painter->setClipRect(option->rect);
+
+            QRect checkRect = proxy()->subElementRect(SE_ItemViewItemCheckIndicator, vopt, widget);
+            QRect iconRect = proxy()->subElementRect(SE_ItemViewItemDecoration, vopt, widget);
+            QRect textRect = proxy()->subElementRect(SE_ItemViewItemText, vopt, widget);
+
+            // draw the background
+            proxy()->drawPrimitive(PE_PanelItemViewItem, option, painter, widget);
+
+            // draw the check mark
+            if (vopt->features & QStyleOptionViewItem::HasCheckIndicator) {
+                QStyleOptionViewItem option(*vopt);
+                option.rect = checkRect;
+                option.state = option.state & ~QStyle::State_HasFocus;
+
+                switch (vopt->checkState) {
+                case Qt::Unchecked:
+                    option.state |= QStyle::State_Off;
+                    break;
+                case Qt::PartiallyChecked:
+                    option.state |= QStyle::State_NoChange;
+                    break;
+                case Qt::Checked:
+                    option.state |= QStyle::State_On;
+                    break;
+                }
+                proxy()->drawPrimitive(QStyle::PE_IndicatorItemViewItemCheck, &option, painter, widget);
+            }
+
+            // draw the icon
+            QIcon::Mode mode = QIcon::Normal;
+            if (!(vopt->state & QStyle::State_Enabled))
+                mode = QIcon::Disabled;
+            else if (vopt->state & QStyle::State_Selected)
+                mode = QIcon::Selected;
+            QIcon::State state = vopt->state & QStyle::State_Open ? QIcon::On : QIcon::Off;
+            vopt->icon.paint(painter, iconRect, vopt->decorationAlignment, mode, state);
+
+            // draw the text
+            if (!vopt->text.isEmpty()) {
+                QPalette::ColorGroup cg = vopt->state & QStyle::State_Enabled
+                                        ? QPalette::Normal : QPalette::Disabled;
+                if (cg == QPalette::Normal && !(vopt->state & QStyle::State_Active))
+                    cg = QPalette::Inactive;
+
+                if (vopt->state & QStyle::State_Selected) {
+                    painter->setPen(vopt->palette.color(cg, QPalette::HighlightedText));
+                } else {
+                    painter->setPen(vopt->palette.color(cg, QPalette::Text));
+                }
+                if (vopt->state & QStyle::State_Editing) {
+                    painter->setPen(vopt->palette.color(cg, QPalette::Text));
+                    painter->drawRect(textRect.adjusted(0, 0, -1, -1));
+                }
+
+                viewItemDrawText(painter, vopt, textRect);
+            }
+
+            // NO FOCUS
+            painter->restore();
+        }
+        break;
     case CE_MenuHMargin:
     case CE_MenuVMargin:
         break;
@@ -1639,7 +1697,7 @@ int ModernStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, con
     return StyleHelper::dpiScaled(val, option);
 }
 
-void ModernStyle::drawComplexControl(ComplexControl control, const QStyleOptionComplex *option,
+void ModernStyle::drawComplexControl(QStyle::ComplexControl control, const QStyleOptionComplex *option,
                                       QPainter *painter, const QWidget *widget) const
 {
     QColor buttonColor = StyleHelper::buttonColor(option->palette);

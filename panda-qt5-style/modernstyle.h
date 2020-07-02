@@ -2,6 +2,9 @@
 #define MODERNSTYLE_H
 
 #include <QCommonStyle>
+#include <QTextOption>
+#include <QStyleOptionViewItem>
+#include <QStyleOptionToolButton>
 #include "blurhelper.h"
 
 class ModernStyle : public QCommonStyle
@@ -51,10 +54,20 @@ public:
     void polish(QApplication *app) override;
     void polish(QPalette &pal) override;
     void unpolish(QWidget *widget) override;
-    void unpolish(QApplication *app) override;
+    void unpolish(QApplication *app);
+
+private:
+    QString calculateElidedText(const QString &text, const QTextOption &textOption,
+                                const QFont &font, const QRect &textRect, const Qt::Alignment valign,
+                                Qt::TextElideMode textElideMode, int flags,
+                                bool lastVisibleLineShouldBeElided, QPointF *paintStartPosition) const;
+    void viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, const QRect &rect) const;
+    QString toolButtonElideText(const QStyleOptionToolButton *toolbutton,
+                                const QRect &textRect, int flags) const;
 
 private:
     BlurHelper *m_blurHelper;
+    double m_radiusRatio = 0.1;
 };
 
 #endif

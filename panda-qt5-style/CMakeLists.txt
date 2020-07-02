@@ -24,6 +24,7 @@ set (SRCS
     pstyleplugin.cpp
     pstyleplugin.h
     stylehelper.h
+    styleutils.cpp
 )
 
 add_library(${TARGET} MODULE ${SRCS})
