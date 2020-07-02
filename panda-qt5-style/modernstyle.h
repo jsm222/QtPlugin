@@ -14,7 +14,8 @@ public:
         menuItemHMargin      =  3, // menu item hor text margin
         menuArrowHMargin     =  6, // menu arrow horizontal margin
         menuRightBorder      = 15, // right border on menus
-        menuCheckMarkWidth   = 12  // checkmarks width on menus
+        menuCheckMarkWidth   = 12, // checkmarks width on menus
+        splitterWidth        = 1
     };
 
 public:

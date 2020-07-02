@@ -171,7 +171,7 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
             painter->setRenderHint(QPainter::Antialiasing,true);
             painter->setBrush(Qt::NoBrush);
             if(option->state & State_Enabled){
-                painter->setPen(QPen(option->palette.foreground().color(), 1.1));
+                painter->setPen(QPen(option->palette.windowText().color(), 1.1));
                 if (option->state & State_MouseOver) {
                     painter->setPen(QPen(option->palette.color(QPalette::Highlight), 1.1));
                 }
@@ -1614,7 +1614,7 @@ int ModernStyle::pixelMetric(PixelMetric metric, const QStyleOption *option, con
         break;
     case PM_DockWidgetHandleExtent:
     case PM_SplitterWidth:
-        val = 4;
+        val = splitterWidth;
         break;
     case PM_IndicatorHeight:
     case PM_IndicatorWidth:
@@ -1749,14 +1749,14 @@ void ModernStyle::drawComplexControl(ComplexControl control, const QStyleOptionC
 
         // copy rect and palette
         const QRect &rect(horizontal ? option->rect.adjusted(-1, 4, 0, -4) : option->rect.adjusted(4, -1, -4, 0));
-        const QPalette &palette(option->palette);
+        //const QPalette &palette(option->palette);
 
         // define handle rect
         QRect handleRect;
 
         bool enabled(state & State_Enabled);
         bool mouseOver((state & State_Active) && enabled && (state & State_MouseOver));
-        bool sunken(enabled && (state & (State_On | State_Sunken)));
+        //bool sunken(enabled && (state & (State_On | State_Sunken)));
         qreal opacity;
         if (mouseOver)
             opacity = 0.7;
