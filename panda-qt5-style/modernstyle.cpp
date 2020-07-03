@@ -96,7 +96,7 @@ ModernStyle::~ModernStyle()
 
 QPalette ModernStyle::standardPalette() const
 {
-    QColor backGround(255, 255, 255);
+    QColor backGround(251, 251, 251);
     QColor light = backGround.lighter(150);
     QColor mid(backGround.darker(130));
     QColor midLight = mid.lighter(110);
@@ -2057,7 +2057,9 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
         newSize += QSize(2, 2);
         break;
     case CT_SpinBox:
-        newSize += QSize(0, -3);
+        if (qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
+            newSize += QSize(size.height() * 2, 0);
+        }
         break;
     case CT_ComboBox:
         newSize += QSize(2, 4);
@@ -2202,7 +2204,6 @@ QRect ModernStyle::subControlRect(ComplexControl control, const QStyleOptionComp
             case SC_SpinBoxDown:
                 if (spinbox->buttonSymbols == QAbstractSpinBox::NoButtons)
                     return QRect();
-
                 rect = QRect(x, center, buttonWidth, spinbox->rect.bottom() - center - fw + 1);
                 break;
             case SC_SpinBoxEditField:
