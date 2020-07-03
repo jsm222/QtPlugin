@@ -18,7 +18,8 @@ public:
         menuArrowHMargin     =  6, // menu arrow horizontal margin
         menuRightBorder      = 15, // right border on menus
         menuCheckMarkWidth   = 12, // checkmarks width on menus
-        splitterWidth        = 1
+        splitterWidth        = 1,
+        tabbarMargin         = 10
     };
 
 public:
@@ -64,10 +65,11 @@ private:
     void viewItemDrawText(QPainter *p, const QStyleOptionViewItem *option, const QRect &rect) const;
     QString toolButtonElideText(const QStyleOptionToolButton *toolbutton,
                                 const QRect &textRect, int flags) const;
+    void tabLayout(const QStyleOptionTab *opt, const QWidget *widget, QRect *textRect, QRect *iconRect) const;
 
 private:
     BlurHelper *m_blurHelper;
-    double m_radiusRatio = 0.1;
+    double m_radiusRatio = 0.15;
 };
 
 #endif

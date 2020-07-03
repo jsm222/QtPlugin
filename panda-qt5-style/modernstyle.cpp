@@ -208,7 +208,6 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         break;
     // tabbar
     case PE_FrameTabBarBase:
-        // 不画
         break;
     case PE_Frame:
         break;
@@ -1454,7 +1453,6 @@ void ModernStyle::drawControl(ControlElement element, const QStyleOption *option
     case CE_TabBarTabShape:
         painter->save();
         if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
-
             bool rtlHorTabs = (tab->direction == Qt::RightToLeft
                                && (tab->shape == QTabBar::RoundedNorth
                                    || tab->shape == QTabBar::RoundedSouth));
@@ -1519,52 +1517,110 @@ void ModernStyle::drawControl(ControlElement element, const QStyleOption *option
             painter->setRenderHint(QPainter::Antialiasing, true);
             painter->translate(0.5, 0.5);
 
-            QColor tabFrameColor = tab->features & QStyleOptionTab::HasFrame ?
-                        StyleHelper::tabFrameColor(option->palette) :
-                        option->palette.window().color();
+//            QColor tabFrameColor = tab->features & QStyleOptionTab::HasFrame ?
+//                        StyleHelper::tabFrameColor(option->palette) :
+//                        option->palette.window().color();
 
-            QLinearGradient fillGradient(rect.topLeft(), rect.bottomLeft());
-            QLinearGradient outlineGradient(rect.topLeft(), rect.bottomLeft());
-            QPen outlinePen = outline.lighter(110);
-            if (selected) {
-                fillGradient.setColorAt(0, tabFrameColor.lighter(104));
-                //                QColor highlight = option->palette.highlight().color();
-                //                if (option->state & State_HasFocus && option->state & State_KeyboardFocusChange) {
-                //                    fillGradient.setColorAt(0, highlight.lighter(130));
-                //                    outlineGradient.setColorAt(0, highlight.darker(130));
-                //                    fillGradient.setColorAt(0.14, highlight);
-                //                    outlineGradient.setColorAt(0.14, highlight.darker(130));
-                //                    fillGradient.setColorAt(0.1401, tabFrameColor);
-                //                    outlineGradient.setColorAt(0.1401, highlight.darker(130));
-                //                }
-                fillGradient.setColorAt(1, tabFrameColor);
-                outlineGradient.setColorAt(1, outline);
-                outlinePen = QPen(outlineGradient, 1);
-            } else {
-                fillGradient.setColorAt(0, tabFrameColor.darker(108));
-                fillGradient.setColorAt(0.85, tabFrameColor.darker(108));
-                fillGradient.setColorAt(1, tabFrameColor.darker(116));
-            }
+//            QLinearGradient fillGradient(rect.topLeft(), rect.bottomLeft());
+//            QLinearGradient outlineGradient(rect.topLeft(), rect.bottomLeft());
+//            QPen outlinePen = outline.lighter(110);
+//            if (selected) {
+//                fillGradient.setColorAt(0, tabFrameColor.lighter(104));
+//                fillGradient.setColorAt(1, tabFrameColor);
+//                outlineGradient.setColorAt(1, outline);
+//                outlinePen = QPen(outlineGradient, 1);
+//            } else {
+//                fillGradient.setColorAt(0, tabFrameColor.darker(108));
+//                fillGradient.setColorAt(0.85, tabFrameColor.darker(108));
+//                fillGradient.setColorAt(1, tabFrameColor.darker(116));
+//            }
 
-            QRect drawRect = rect.adjusted(0, selected ? 0 : 2, 0, 3);
-            painter->setPen(outlinePen);
-            painter->save();
-            painter->setClipRect(rect.adjusted(-1, -1, 1, selected ? -2 : -3));
-            painter->setBrush(fillGradient);
-            painter->drawRoundedRect(drawRect.adjusted(0, 0, -1, -1), 2.0, 2.0);
-            painter->setBrush(Qt::NoBrush);
-            painter->setPen(StyleHelper::innerContrastLine());
-            painter->drawRoundedRect(drawRect.adjusted(1, 1, -2, -1), 2.0, 2.0);
-            painter->restore();
+//            QRect drawRect = rect.adjusted(0, selected ? 0 : 2, 0, 3);
+//            painter->setPen(outlinePen);
+//            painter->save();
+//            painter->setClipRect(rect.adjusted(-1, -1, 1, selected ? -2 : -3));
+//            painter->setBrush(fillGradient);
+//            painter->drawRoundedRect(drawRect.adjusted(0, 0, -1, -1), 2.0, 2.0);
+//            painter->setBrush(Qt::NoBrush);
+//            painter->setPen(StyleHelper::innerContrastLine());
+//            painter->drawRoundedRect(drawRect.adjusted(1, 1, -2, -1), 2.0, 2.0);
+//            painter->restore();
+
+            QRect drawRect = rect;
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(selected ? option->palette.highlight().color().lighter(100) : Qt::transparent);
 
             if (selected) {
-                painter->fillRect(rect.left() + 1, rect.bottom() - 1, rect.width() - 2, rect.bottom() - 1, tabFrameColor);
-                painter->fillRect(QRect(rect.bottomRight() + QPoint(-2, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
-                painter->fillRect(QRect(rect.bottomLeft() + QPoint(0, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
-                painter->fillRect(QRect(rect.bottomRight() + QPoint(-1, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
+                const int radius = drawRect.height() * m_radiusRatio;
+                painter->drawRoundedRect(drawRect.adjusted(radius, radius, -radius, -radius), radius, radius);
+                // painter->fillRect(rect.left() + 1, rect.bottom() - 1, rect.width() - 2, rect.bottom() - 1, tabFrameColor);
+                // painter->fillRect(QRect(rect.bottomRight() + QPoint(-2, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
+                // painter->fillRect(QRect(rect.bottomLeft() + QPoint(0, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
+                // painter->fillRect(QRect(rect.bottomRight() + QPoint(-1, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
             }
         }
         painter->restore();
+        break;
+    case CE_TabBarTabLabel:
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab *>(option)) {
+            QRect tr = tab->rect;
+            bool verticalTabs = tab->shape == QTabBar::RoundedEast
+                                || tab->shape == QTabBar::RoundedWest
+                                || tab->shape == QTabBar::TriangularEast
+                                || tab->shape == QTabBar::TriangularWest;
+
+            int alignment = Qt::AlignCenter | Qt::TextShowMnemonic;
+            if (!proxy()->styleHint(SH_UnderlineShortcut, option, widget))
+                alignment |= Qt::TextHideMnemonic;
+
+            if (verticalTabs) {
+                painter->save();
+                int newX, newY, newRot;
+                if (tab->shape == QTabBar::RoundedEast || tab->shape == QTabBar::TriangularEast) {
+                    newX = tr.width() + tr.x();
+                    newY = tr.y();
+                    newRot = 90;
+                } else {
+                    newX = tr.x();
+                    newY = tr.y() + tr.height();
+                    newRot = -90;
+                }
+                QTransform m = QTransform::fromTranslate(newX, newY);
+                m.rotate(newRot);
+                painter->setTransform(m, true);
+            }
+            QRect iconRect;
+            tabLayout(tab, widget, &tr, &iconRect);
+            tr = proxy()->subElementRect(SE_TabBarTabText, option, widget); //we compute tr twice because the style may override subElementRect
+
+            if (!tab->icon.isNull()) {
+                QPixmap tabIcon = tab->icon.pixmap(qt_getWindow(widget), tab->iconSize,
+                                                   (tab->state & State_Enabled) ? QIcon::Normal
+                                                                                : QIcon::Disabled,
+                                                   (tab->state & State_Selected) ? QIcon::On
+                                                                                 : QIcon::Off);
+                painter->drawPixmap(iconRect.x(), iconRect.y(), tabIcon);
+            }
+
+            bool selected = tab->state & State_Selected && tab->state & State_Enabled;
+            proxy()->drawItemText(painter, tr, alignment, tab->palette, tab->state & State_Enabled, tab->text, selected ? QPalette::HighlightedText : QPalette::WindowText);
+            if (verticalTabs)
+                painter->restore();
+
+//            if (tab->state & State_HasFocus) {
+//                const int OFFSET = 1 + pixelMetric(PM_DefaultFrameWidth);
+
+//                int x1, x2;
+//                x1 = tab->rect.left();
+//                x2 = tab->rect.right() - 1;
+
+//                QStyleOptionFocusRect fropt;
+//                fropt.QStyleOption::operator=(*tab);
+//                fropt.rect.setRect(x1 + 1 + OFFSET, tab->rect.y() + OFFSET,
+//                                   x2 - x1 - 2*OFFSET, tab->rect.height() - 2*OFFSET);
+//                drawPrimitive(PE_FrameFocusRect, &fropt, painter, widget);
+//            }
+        }
         break;
     default:
         QCommonStyle::drawControl(element, option, painter, widget);
@@ -2021,6 +2077,7 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
                                      const QSize &size, const QWidget *widget) const
 {
     QSize newSize = QCommonStyle::sizeFromContents(type, option, size, widget);
+
     switch (type) {
     case CT_PushButton:
         if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(option)) {
@@ -2093,6 +2150,11 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
     case CT_SizeGrip:
         newSize += QSize(4, 4);
         break;
+    case CT_TabBarTab: {
+        if (const QStyleOptionTab *tab = qstyleoption_cast<const QStyleOptionTab*>(option)) {
+            newSize += QSize(tabbarMargin, tabbarMargin);
+        }
+    }
     case CT_MdiControls:
         newSize -= QSize(1, 0);
         break;

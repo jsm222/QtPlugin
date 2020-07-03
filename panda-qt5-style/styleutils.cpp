@@ -150,3 +150,70 @@ QString ModernStyle::toolButtonElideText(const QStyleOptionToolButton *option,
                                Qt::ElideMiddle, flags,
                                false, nullptr);
 }
+
+/**
+    Compute the textRect and the pixmapRect from the opt rect
+    Uses the same computation than in QTabBar::tabSizeHint
+*/
+void ModernStyle::tabLayout(const QStyleOptionTab *opt, const QWidget *widget, QRect *textRect, QRect *iconRect) const
+{
+    Q_ASSERT(textRect);
+    Q_ASSERT(iconRect);
+    QRect tr = opt->rect;
+    bool verticalTabs = opt->shape == QTabBar::RoundedEast
+                        || opt->shape == QTabBar::RoundedWest
+                        || opt->shape == QTabBar::TriangularEast
+                        || opt->shape == QTabBar::TriangularWest;
+    if (verticalTabs)
+        tr.setRect(0, 0, tr.height(), tr.width()); // 0, 0 as we will have a translate transform
+
+    int verticalShift = proxy()->pixelMetric(QStyle::PM_TabBarTabShiftVertical, opt, widget);
+    int horizontalShift = proxy()->pixelMetric(QStyle::PM_TabBarTabShiftHorizontal, opt, widget);
+    int hpadding = proxy()->pixelMetric(QStyle::PM_TabBarTabHSpace, opt, widget) / 2;
+    int vpadding = proxy()->pixelMetric(QStyle::PM_TabBarTabVSpace, opt, widget) / 2;
+    if (opt->shape == QTabBar::RoundedSouth || opt->shape == QTabBar::TriangularSouth)
+        verticalShift = -verticalShift;
+    tr.adjust(hpadding, verticalShift - vpadding, horizontalShift - hpadding, vpadding);
+    bool selected = opt->state & QStyle::State_Selected;
+    if (selected) {
+        tr.setTop(tr.top() - verticalShift);
+        tr.setRight(tr.right() - horizontalShift);
+    }
+
+    // left widget
+    if (!opt->leftButtonSize.isEmpty()) {
+        tr.setLeft(tr.left() + 4 +
+            (verticalTabs ? opt->leftButtonSize.height() : opt->leftButtonSize.width()));
+    }
+    // right widget
+    if (!opt->rightButtonSize.isEmpty()) {
+        tr.setRight(tr.right() - 4 -
+            (verticalTabs ? opt->rightButtonSize.height() : opt->rightButtonSize.width()));
+    }
+
+    // icon
+    if (!opt->icon.isNull()) {
+        QSize iconSize = opt->iconSize;
+        if (!iconSize.isValid()) {
+            int iconExtent = proxy()->pixelMetric(QStyle::PM_SmallIconSize);
+            iconSize = QSize(iconExtent, iconExtent);
+        }
+        QSize tabIconSize = opt->icon.actualSize(iconSize,
+                        (opt->state & QStyle::State_Enabled) ? QIcon::Normal : QIcon::Disabled,
+                        (opt->state & QStyle::State_Selected) ? QIcon::On : QIcon::Off);
+        // High-dpi icons do not need adjustment; make sure tabIconSize is not larger than iconSize
+        tabIconSize = QSize(qMin(tabIconSize.width(), iconSize.width()), qMin(tabIconSize.height(), iconSize.height()));
+
+        const int offsetX = (iconSize.width() - tabIconSize.width()) / 2;
+        *iconRect = QRect(tr.left() + offsetX, tr.center().y() - tabIconSize.height() / 2,
+                          tabIconSize.width(), tabIconSize.height());
+        if (!verticalTabs)
+            *iconRect = QStyle::visualRect(opt->direction, opt->rect, *iconRect);
+        tr.setLeft(tr.left() + tabIconSize.width() + 4);
+    }
+
+    if (!verticalTabs)
+        tr = QStyle::visualRect(opt->direction, opt->rect, tr);
+
+    *textRect = tr;
+}
