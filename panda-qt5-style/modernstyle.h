@@ -19,7 +19,8 @@ public:
         menuRightBorder      = 15, // right border on menus
         menuCheckMarkWidth   = 12, // checkmarks width on menus
         splitterWidth        = 1,
-        tabbarMargin         = 10
+        tabbarMargin         = 10,
+        pushButtonMargin     = 8
     };
 
 public:

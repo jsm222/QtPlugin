@@ -107,7 +107,7 @@ QPalette ModernStyle::standardPalette() const
     QColor text = Qt::black;
     QColor hightlightedText = Qt::white;
     QColor disabledText = QColor(190, 190, 190);
-    QColor button = backGround;
+    QColor button = QColor(235, 235, 235);
     QColor shadow = dark.darker(135);
     QColor disabledShadow = shadow.lighter(150);
     QColor placeholder = text;
@@ -272,18 +272,6 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         painter->drawLine(QPoint(rect.left() + 1, rect.bottom() - 1), QPoint(rect.right() - 2, rect.bottom() - 1));
         painter->drawLine(QPoint(rect.right() - 1, rect.top() + 1), QPoint(rect.right() - 1, rect.bottom() - 1));
     }
-        painter->restore();
-        break;
-    case PE_PanelButtonTool:
-        painter->save();
-        if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
-            if (widget && widget->inherits("QDockWidgetTitleButton")) {
-                if (option->state & State_MouseOver)
-                    proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
-            } else {
-                proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
-            }
-        }
         painter->restore();
         break;
     case PE_PanelItemViewItem: {
@@ -526,6 +514,18 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
             painter->restore();
         }
         break;
+    case PE_PanelButtonTool:
+        painter->save();
+        if ((option->state & State_Enabled || option->state & State_On) || !(option->state & State_AutoRaise)) {
+            if (widget && widget->inherits("QDockWidgetTitleButton")) {
+                if (option->state & State_MouseOver)
+                    proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
+            } else {
+                proxy()->drawPrimitive(PE_PanelButtonCommand, option, painter, widget);
+            }
+        }
+        painter->restore();
+        break;
     case PE_PanelButtonCommand:
         if (const QStyleOptionButton *buttonOption = qstyleoption_cast<const QStyleOptionButton* >(option)) {
             // rect and palette
@@ -545,7 +545,7 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
             painter->translate(0.5, 0.5);
             painter->fillRect(rect, Qt::transparent);
             painter->setPen(Qt::NoPen);
-            painter->setBrush(QColor(242, 242, 242));
+            painter->setBrush(option->palette.button().color());
             const QRectF baseRect(rect.adjusted(0, 0, -radius / 2, -radius / 2));
 
             if (state & State_MouseOver) {
@@ -1517,47 +1517,12 @@ void ModernStyle::drawControl(ControlElement element, const QStyleOption *option
             painter->setRenderHint(QPainter::Antialiasing, true);
             painter->translate(0.5, 0.5);
 
-//            QColor tabFrameColor = tab->features & QStyleOptionTab::HasFrame ?
-//                        StyleHelper::tabFrameColor(option->palette) :
-//                        option->palette.window().color();
-
-//            QLinearGradient fillGradient(rect.topLeft(), rect.bottomLeft());
-//            QLinearGradient outlineGradient(rect.topLeft(), rect.bottomLeft());
-//            QPen outlinePen = outline.lighter(110);
-//            if (selected) {
-//                fillGradient.setColorAt(0, tabFrameColor.lighter(104));
-//                fillGradient.setColorAt(1, tabFrameColor);
-//                outlineGradient.setColorAt(1, outline);
-//                outlinePen = QPen(outlineGradient, 1);
-//            } else {
-//                fillGradient.setColorAt(0, tabFrameColor.darker(108));
-//                fillGradient.setColorAt(0.85, tabFrameColor.darker(108));
-//                fillGradient.setColorAt(1, tabFrameColor.darker(116));
-//            }
-
-//            QRect drawRect = rect.adjusted(0, selected ? 0 : 2, 0, 3);
-//            painter->setPen(outlinePen);
-//            painter->save();
-//            painter->setClipRect(rect.adjusted(-1, -1, 1, selected ? -2 : -3));
-//            painter->setBrush(fillGradient);
-//            painter->drawRoundedRect(drawRect.adjusted(0, 0, -1, -1), 2.0, 2.0);
-//            painter->setBrush(Qt::NoBrush);
-//            painter->setPen(StyleHelper::innerContrastLine());
-//            painter->drawRoundedRect(drawRect.adjusted(1, 1, -2, -1), 2.0, 2.0);
-//            painter->restore();
-
             QRect drawRect = rect;
+            const int radius = drawRect.height() * m_radiusRatio;
             painter->setPen(Qt::NoPen);
-            painter->setBrush(selected ? option->palette.highlight().color().lighter(100) : Qt::transparent);
-
-            if (selected) {
-                const int radius = drawRect.height() * m_radiusRatio;
-                painter->drawRoundedRect(drawRect.adjusted(radius, radius, -radius, -radius), radius, radius);
-                // painter->fillRect(rect.left() + 1, rect.bottom() - 1, rect.width() - 2, rect.bottom() - 1, tabFrameColor);
-                // painter->fillRect(QRect(rect.bottomRight() + QPoint(-2, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
-                // painter->fillRect(QRect(rect.bottomLeft() + QPoint(0, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
-                // painter->fillRect(QRect(rect.bottomRight() + QPoint(-1, -1), QSize(1, 1)), StyleHelper::innerContrastLine());
-            }
+            painter->setBrush(selected ? option->palette.highlight().color().lighter(100)
+                                       : option->palette.button().color());
+            painter->drawRoundedRect(drawRect.adjusted(radius, radius, -radius, -radius), radius, radius);
         }
         painter->restore();
         break;
@@ -2080,6 +2045,8 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
 
     switch (type) {
     case CT_PushButton:
+        newSize += QSize(pushButtonMargin, pushButtonMargin);
+
         if (const QStyleOptionButton *btn = qstyleoption_cast<const QStyleOptionButton *>(option)) {
             if (!btn->text.isEmpty() && newSize.width() < 80)
                 newSize.setWidth(80);
@@ -2106,8 +2073,10 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
     case CT_ComboBox:
         newSize += QSize(2, 4);
         break;
-    case CT_LineEdit:
-        newSize += QSize(0, 4);
+    case CT_LineEdit: {
+        int margin = proxy()->pixelMetric(QStyle::PM_ButtonMargin, option, widget);
+        newSize += QSize(margin, margin);
+    }
         break;
     case CT_MenuBarItem:
         newSize += QSize(8, 5);
@@ -2477,6 +2446,8 @@ int ModernStyle::styleHint(StyleHint hint, const QStyleOption *option, const QWi
     case SH_RubberBand_Mask:
         return 0;
 
+    case SH_Header_ArrowAlignment:
+        return Qt::AlignVCenter | Qt::AlignRight;
     case SH_ScrollBar_Transient:
         return 1;
 
@@ -2491,8 +2462,10 @@ int ModernStyle::styleHint(StyleHint hint, const QStyleOption *option, const QWi
     case SH_MessageBox_TextInteractionFlags:
         return Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
     case SH_Menu_SubMenuPopupDelay:
-        return 225; // default from GtkMenu
-
+//        return 225; // default from GtkMenu
+        return 100;
+    case SH_ToolTipLabel_Opacity:
+        return 255;
     case SH_WindowFrame_Mask:
         if (QStyleHintReturnMask *mask = qstyleoption_cast<QStyleHintReturnMask *>(returnData)) {
             //left rounded corner
