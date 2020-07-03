@@ -252,6 +252,18 @@ public:
         pa->drawImage(shadow_rect.topLeft(), new_shadow);
     }
 
+    static void drawShadow(QPainter *p, const QRect &rect, const QColor &color, int frameRadius, int xoffset, int yoffset)
+    {
+        QRect shadow = rect;
+        QPoint pointOffset(rect.center().x() + xoffset, rect.center().y() + yoffset);
+        shadow.moveCenter(pointOffset);
+
+        p->setBrush(color);
+        p->setPen(Qt::NoPen);
+        p->setRenderHint(QPainter::Antialiasing);
+        p->drawRoundedRect(shadow, frameRadius, frameRadius);
+    }
+
     enum {
         menuItemHMargin      =  3, // menu item hor text margin
         menuArrowHMargin     =  6, // menu arrow horizontal margin

@@ -107,7 +107,7 @@ QPalette ModernStyle::standardPalette() const
     QColor text = Qt::black;
     QColor hightlightedText = Qt::white;
     QColor disabledText = QColor(190, 190, 190);
-    QColor button = QColor(235, 235, 235);
+    QColor button = QColor(242, 242, 242);
     QColor shadow = dark.darker(135);
     QColor disabledShadow = shadow.lighter(150);
     QColor placeholder = text;
@@ -204,6 +204,18 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
             painter->drawLine(points[2],  points[3] );
             painter->restore();
         }
+    }
+        break;
+    case PE_FrameGroupBox: {
+        if (auto group_opt = qstyleoption_cast<const QStyleOptionFrame*>(option)) {
+            if (group_opt->features & QStyleOptionFrame::Flat)
+                break;
+            }
+
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(option->palette.button().color());
+        painter->drawRoundedRect(option->rect, frameRadius, frameRadius);
     }
         break;
     // tabbar
@@ -355,31 +367,55 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         break;
     case PE_FrameLineEdit:
     {
+//        QRect r = rect;
+//        bool hasFocus = option->state & State_HasFocus;
+
+//        painter->save();
+
+//        painter->setRenderHint(QPainter::Antialiasing, true);
+//        //  ### highdpi painter bug.
+//        painter->translate(0.5, 0.5);
+
+//        // Draw Outline
+//        painter->setPen( QPen(hasFocus ? highlightedOutline : outline));
+//        painter->drawRoundedRect(r.adjusted(0, 0, -1, -1), 2, 2);
+
+//        if (hasFocus) {
+//            QColor softHighlight = highlightedOutline;
+//            softHighlight.setAlpha(40);
+//            painter->setPen(softHighlight);
+//            painter->drawRoundedRect(r.adjusted(1, 1, -2, -2), 1.7, 1.7);
+//        }
+//        // Draw inner shadow
+//        painter->setPen(topShadow);
+//        painter->drawLine(QPoint(r.left() + 2, r.top() + 1), QPoint(r.right() - 2, r.top() + 1));
+
+//        painter->restore();
+    }
+        break;
+    case PE_PanelLineEdit: {
         QRect r = rect;
         bool hasFocus = option->state & State_HasFocus;
+        int radius = r.height() * m_normalRadiusRatio;
 
         painter->save();
 
         painter->setRenderHint(QPainter::Antialiasing, true);
         //  ### highdpi painter bug.
-        painter->translate(0.5, 0.5);
-
-        // Draw Outline
-        painter->setPen( QPen(hasFocus ? highlightedOutline : outline));
-        painter->drawRoundedRect(r.adjusted(0, 0, -1, -1), 2, 2);
+        // painter->translate(0.5, 0.5);
+        painter->setBrush(option->palette.button().color());
 
         if (hasFocus) {
-            QColor softHighlight = highlightedOutline;
-            softHighlight.setAlpha(40);
-            painter->setPen(softHighlight);
-            painter->drawRoundedRect(r.adjusted(1, 1, -2, -2), 1.7, 1.7);
+            QPen pen;
+            pen.setColor(option->palette.highlight().color());
+            pen.setWidthF(1.0);
+            painter->setPen(option->palette.highlight().color());
+        } else {
+            painter->setPen(Qt::NoPen);
         }
-        // Draw inner shadow
-        painter->setPen(topShadow);
-        painter->drawLine(QPoint(r.left() + 2, r.top() + 1), QPoint(r.right() - 2, r.top() + 1));
 
+        painter->drawRoundedRect(r.adjusted(radius, radius, -radius, -radius), radius, radius);
         painter->restore();
-
     }
         break;
     case PE_IndicatorCheckBox:
@@ -492,27 +528,19 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
     }
     case PE_FrameDefaultButton:
         break;
-    case PE_FrameFocusRect:
-        if (const QStyleOptionFocusRect *fropt = qstyleoption_cast<const QStyleOptionFocusRect *>(option)) {
-            //### check for d->alt_down
-            if (!(fropt->state & State_KeyboardFocusChange))
-                return;
-            QRect rect = option->rect;
+    case PE_FrameFocusRect: {
+        QRect rect = option->rect;
+        int radius = normalRadius;
 
-            painter->save();
-            painter->setRenderHint(QPainter::Antialiasing, true);
-            painter->translate(0.5, 0.5);
-            QColor fillcolor = highlightedOutline;
-            fillcolor.setAlpha(80);
-            painter->setPen(fillcolor.darker(120));
-            fillcolor.setAlpha(30);
-            QLinearGradient gradient(rect.topLeft(), rect.bottomLeft());
-            gradient.setColorAt(0, fillcolor.lighter(160));
-            gradient.setColorAt(1, fillcolor);
-            painter->setBrush(gradient);
-            painter->drawRoundedRect(option->rect.adjusted(0, 0, -1, -1), 1, 1);
-            painter->restore();
-        }
+        painter->save();
+        QPen pen;
+        pen.setWidthF(1.5);
+        pen.setColor(option->palette.highlight().color());
+        painter->setPen(pen);
+        painter->setBrush(Qt::NoBrush);
+        painter->drawRoundedRect(rect.adjusted(radius, radius, -radius, -radius), radius, radius);
+        painter->restore();
+    }
         break;
     case PE_PanelButtonTool:
         painter->save();
@@ -576,6 +604,12 @@ void ModernStyle::drawPrimitive(PrimitiveElement elem,
         painter->restore();
         break ;
 
+    case PE_PanelStatusBar: {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(option->palette.button().color());
+        painter->drawRect(option->rect);
+    }
+        break;
     case PE_FrameStatusBarItem:
         break;
     // case PE_IndicatorTabClose:
@@ -1818,51 +1852,6 @@ void ModernStyle::drawComplexControl(QStyle::ComplexControl control, const QStyl
         }
         painter->restore();
         break;
-
-    case CE_ScrollBarSlider: {
-        const QStyleOptionSlider *sliderOption(qstyleoption_cast<const QStyleOptionSlider *>(option));
-        if (!sliderOption)
-            break;
-
-        const State &state(option->state);
-        bool horizontal(state & State_Horizontal);
-
-        // copy rect and palette
-        const QRect &rect(horizontal ? option->rect.adjusted(-1, 4, 0, -4) : option->rect.adjusted(4, -1, -4, 0));
-        //const QPalette &palette(option->palette);
-
-        // define handle rect
-        QRect handleRect;
-
-        bool enabled(state & State_Enabled);
-        bool mouseOver((state & State_Active) && enabled && (state & State_MouseOver));
-        //bool sunken(enabled && (state & (State_On | State_Sunken)));
-        qreal opacity;
-        if (mouseOver)
-            opacity = 0.7;
-        else
-            opacity = 0.2;
-
-        if (horizontal) {
-            handleRect = rect.adjusted(0, 6, 0, 2);
-            handleRect.adjust(3, -6.0 * opacity, -6, -2.0 * opacity);
-        } else {
-            handleRect = rect.adjusted(6, 0, 2, 0);
-            handleRect.adjust(-6.0 * opacity, 2, -2.0 * opacity, -4);
-        }
-
-        painter->save();
-        painter->setRenderHint(QPainter::Antialiasing, true);
-        qreal metric(handleRect.width() < handleRect.height() ? handleRect.width() : handleRect.height());
-        qreal radius(0.5 * metric);
-
-        painter->setPen(Qt::NoPen);
-        painter->setOpacity(opacity);
-        painter->setBrush(option->palette.windowText());
-        painter->drawRoundedRect(handleRect, radius, radius);
-        painter->restore();
-        break;
-    }
     // case CC_SpinBox:
     //     if (const QStyleOptionSpinBox *spinBox = qstyleoption_cast<const QStyleOptionSpinBox *>(option)) {
     //         QPixmap cache;
@@ -2074,8 +2063,7 @@ QSize ModernStyle::sizeFromContents(ContentsType type, const QStyleOption *optio
         newSize += QSize(2, 4);
         break;
     case CT_LineEdit: {
-        int margin = proxy()->pixelMetric(QStyle::PM_ButtonMargin, option, widget);
-        newSize += QSize(margin, margin);
+        newSize += QSize(pushButtonMargin, pushButtonMargin);
     }
         break;
     case CT_MenuBarItem:
@@ -2435,6 +2423,7 @@ int ModernStyle::styleHint(StyleHint hint, const QStyleOption *option, const QWi
     case SH_MenuBar_MouseTracking:
     case SH_Menu_MouseTracking:
     case SH_Menu_SupportsSections:
+    case SH_SpinBox_AnimateButton:
         return 1;
     case SH_ComboBox_UseNativePopup:
         return 1;
@@ -2444,6 +2433,7 @@ int ModernStyle::styleHint(StyleHint hint, const QStyleOption *option, const QWi
     case SH_MainWindow_SpaceBelowMenuBar:
     case SH_MessageBox_CenterButtons:
     case SH_RubberBand_Mask:
+    case SH_SpinBox_ButtonsInsideFrame:
         return 0;
 
     case SH_Header_ArrowAlignment:

@@ -14,12 +14,14 @@ class ModernStyle : public QCommonStyle
 public:
     enum {
         frameRadius          =  10, // frame radius
+        frameMargin          =  5,
+        normalRadius         =  5,
         menuItemHMargin      =  3, // menu item hor text margin
         menuArrowHMargin     =  6, // menu arrow horizontal margin
         menuRightBorder      = 15, // right border on menus
         menuCheckMarkWidth   = 12, // checkmarks width on menus
         splitterWidth        = 1,
-        tabbarMargin         = 10,
+        tabbarMargin         = 8,
         pushButtonMargin     = 8
     };
 
@@ -71,6 +73,7 @@ private:
 private:
     BlurHelper *m_blurHelper;
     double m_radiusRatio = 0.15;
+    double m_normalRadiusRatio = 0.1;
 };
 
 #endif
