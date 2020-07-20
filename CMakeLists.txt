@@ -26,7 +26,7 @@ remove_definitions(-DQT_NO_SIGNALS_SLOTS_KEYWORDS)
 
 pkg_check_modules(XCB_EWMH REQUIRED xcb xcb-ewmh x11)
 
-add_subdirectory(panda-qt5-style)
+add_subdirectory(style-plugin)
 
 set (SRCS
     main.cpp
@@ -62,7 +62,7 @@ target_link_libraries(panda-qtplugin PRIVATE
     Qt5::Core
     Qt5::DBus
     dbusmenu-qt5
-    
+
     KF5::WindowSystem
     ${XCB_LIBRARIES}
     ${QT5PLATFORMSUPPORT_LIBS}
