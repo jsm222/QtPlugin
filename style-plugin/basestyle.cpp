@@ -76,6 +76,7 @@ namespace Phantom
         constexpr qint16 SplitterMaxLength = 25; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
         constexpr qint16 MenuBar_FrameWidth = 6;
+        constexpr qint16 MenuBar_ItemSpacing = 6;
         constexpr qint16 SpinBox_ButtonWidth = 15;
 
         // These two are currently not based on font, but could be
@@ -3065,7 +3066,7 @@ QPalette BaseStyle::standardPalette() const
     palette.setColor(QPalette::Inactive, QPalette::AlternateBase, QRgb(0xF1F6EE));
     palette.setColor(QPalette::Disabled, QPalette::AlternateBase, QRgb(0xE1E9DD));
 
-    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x4D7F1A));
+    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x549CFF));
     palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0xF9F9F9));
 
     palette.setColor(QPalette::Active, QPalette::Button, QRgb(0xD4D5DD));
@@ -3090,10 +3091,10 @@ QPalette BaseStyle::standardPalette() const
     palette.setColor(QPalette::All, QPalette::Dark, QRgb(0xBBBBC2));
     palette.setColor(QPalette::All, QPalette::Shadow, QRgb(0x6C6D79));
 
-    palette.setColor(QPalette::All, QPalette::Link, QRgb(0x4B7B19));
-    palette.setColor(QPalette::Disabled, QPalette::Link, QRgb(0x4F6935));
-    palette.setColor(QPalette::All, QPalette::LinkVisited, QRgb(0x507826));
-    palette.setColor(QPalette::Disabled, QPalette::LinkVisited, QRgb(0x506935));
+    palette.setColor(QPalette::All, QPalette::Link, QRgb(0x4090FF));
+    palette.setColor(QPalette::Disabled, QPalette::Link, QRgb(0x3388FF));
+    palette.setColor(QPalette::All, QPalette::LinkVisited, QRgb(0x4090FF));
+    palette.setColor(QPalette::Disabled, QPalette::LinkVisited, QRgb(0x3388FF));
 
     return palette;
 
@@ -3871,7 +3872,7 @@ int BaseStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const
         val = 0;
         break;
     case PM_MenuBarItemSpacing:
-        val = 0;
+        val = Phantom::MenuBar_ItemSpacing;
         break;
     case PM_MenuBarHMargin:
         // option is usually nullptr, use widget instead to get font metrics
@@ -4020,11 +4021,13 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         return QSize(size.width() + w + margins, qMax(size.height(), h));
     }
     case CT_MenuBarItem: {
-        int fontHeight = option ? option->fontMetrics.height() : size.height();
-        int w = static_cast<int>(fontHeight * Ph::MenuBar_HorizontalPaddingFontRatio);
-        int h = static_cast<int>(fontHeight * Ph::MenuBar_VerticalPaddingFontRatio);
-        int line = Ph::dpiScaled(1);
-        return QSize(size.width() + w * 2, size.height() + h * 2 + line);
+        return QSize(QCommonStyle::sizeFromContents(type, option, size, widget) + QSize(8, 5));
+
+        // int fontHeight = option ? option->fontMetrics.height() : size.height();
+        // int w = static_cast<int>(fontHeight * Ph::MenuBar_HorizontalPaddingFontRatio);
+        // int h = static_cast<int>(fontHeight * Ph::MenuBar_VerticalPaddingFontRatio);
+        // int line = Ph::dpiScaled(1);
+        // return QSize(size.width() + w * 2, size.height() + h * 2 + line);
     }
     case CT_MenuItem: {
         auto menuItem = qstyleoption_cast<const QStyleOptionMenuItem*>(option);
