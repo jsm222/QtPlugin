@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(panda-qtplugin)
+project(panda-qt5-plugins)
 include(GNUInstallDirs)
 
 set(CMAKE_AUTOMOC ON)

@@ -60,6 +60,8 @@ QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
 QT_END_NAMESPACE
 
+extern void qt_blurImage(QImage &blurImage, qreal radius, bool quality, int transposed);
+
 // Redefine Q_FALLTHROUGH for older Qt versions
 #ifndef Q_FALLTHROUGH
 #if (defined(Q_CC_GNU) && Q_CC_GNU >= 700) && !defined(Q_CC_INTEL)
@@ -87,16 +89,17 @@ namespace Phantom
         constexpr qint16 HeaderSortIndicator_VOffset = 2;
         constexpr qint16 TabBar_InctiveVShift = 0;
 
+        constexpr qreal DefaultFrame_Radius = 5.0;
         constexpr qreal TabBarTab_Rounding = 1.0;
-        constexpr qreal SpinBox_Rounding = 1.0;
-        constexpr qreal LineEdit_Rounding = 1.0;
-        constexpr qreal FrameFocusRect_Rounding = 1.0;
-        constexpr qreal PushButton_Rounding = 1.0;
-        constexpr qreal ToolButton_Rounding = 1.0;
-        constexpr qreal ProgressBar_Rounding = 1.0;
-        constexpr qreal GroupBox_Rounding = 1.0;
-        constexpr qreal SliderGroove_Rounding = 1.0;
-        constexpr qreal SliderHandle_Rounding = 1.0;
+        constexpr qreal SpinBox_Rounding = 5.0;
+        constexpr qreal LineEdit_Rounding = 5.0;
+        constexpr qreal FrameFocusRect_Rounding = 5.0;
+        constexpr qreal PushButton_Rounding = 5.0;
+        constexpr qreal ToolButton_Rounding = 5.0;
+        constexpr qreal ProgressBar_Rounding = 5.0;
+        constexpr qreal GroupBox_Rounding = 5.0;
+        constexpr qreal SliderGroove_Rounding = 5.0;
+        constexpr qreal SliderHandle_Rounding = 5.0;
 
         constexpr qreal CheckMark_WidthOfHeightScale = 0.8;
         constexpr qreal PushButton_HorizontalPaddingFontHeightRatio = 1.0;
@@ -2099,6 +2102,49 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         Ph::fillRectOutline(painter, option->rect, 1, swatch.color(S_window_divider));
         QRect bgRect = option->rect.adjusted(1, isBelowMenuBar ? 0 : 1, -1, -1);
         painter->fillRect(bgRect, swatch.color(S_window));
+
+        // painter->save();
+        // int radius = Phantom::DefaultFrame_Radius;
+        // QPainterPath rectPath;
+        // rectPath.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
+
+        // QPixmap pixmap(option->rect.size());
+        // pixmap.fill(Qt::transparent);
+        // QPainter pixmapPainter(&pixmap);
+        // pixmapPainter.setRenderHint(QPainter::Antialiasing);
+        // pixmapPainter.setPen(Qt::transparent);
+        // pixmapPainter.setBrush(Qt::black);
+        // pixmapPainter.drawPath(rectPath);
+        // pixmapPainter.end();
+
+        // QImage img = pixmap.toImage();
+        // qt_blurImage(img, radius, false, false);
+
+        // pixmap = QPixmap::fromImage(img);
+        // QPainter pixmapPainter2(&pixmap);
+        // pixmapPainter2.setRenderHint(QPainter::Antialiasing);
+        // pixmapPainter2.setCompositionMode(QPainter::CompositionMode_Clear);
+        // pixmapPainter2.setPen(Qt::transparent);
+        // pixmapPainter2.setBrush(Qt::transparent);
+        // pixmapPainter2.drawPath(rectPath);
+        // painter->drawPixmap(option->rect, pixmap, pixmap.rect());
+
+        // QColor color = option->palette.color(QPalette::Base);
+        // color.setAlpha(200);
+        // painter->setPen(Qt::transparent);
+        // painter->setBrush(color);
+
+        // QPainterPath path;
+        // QRegion region = widget->mask();
+        // if (region.isEmpty()) {
+        //     path.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
+        // } else {
+        //     path.addRegion(region);
+        // }
+
+        // painter->drawPath(path);
+        // painter->restore();
+
         break;
     }
     case Phantom_PE_ScrollBarSliderVertical: {
@@ -2645,6 +2691,13 @@ void BaseStyle::drawControl(ControlElement element,
         if (isSelected) {
             Swatchy fillColor = isSunken ? S_highlight_outline : S_highlight;
             painter->fillRect(option->rect, swatch.color(fillColor));
+            // rekols: Add rounded rectangle.
+            // painter->save();
+            // painter->setPen(Qt::NoPen);
+            // painter->setBrush(swatch.color(fillColor));
+            // painter->setRenderHint(QPainter::Antialiasing);
+            // painter->drawRoundedRect(option->rect, Phantom::DefaultFrame_Radius, Phantom::DefaultFrame_Radius);
+            // painter->restore();
         }
 
         if (isCheckable) {
@@ -3608,7 +3661,7 @@ void BaseStyle::drawComplexControl(ComplexControl control,
                 (scrollBar->orientation == Qt::Horizontal ? scrollBarSlider.height() : scrollBarSlider.width()) / 2.0;
             bool mouseOver((option->state & State_Active) && option->state & State_MouseOver);
             bool mousePress(option->state & State_Sunken);
-            // painter->fillRect(scrollBarSlider, swatch.color(S_window));
+            painter->fillRect(scrollBarSlider, swatch.color(S_window));
             // Ph::paintSolidRoundRect(painter, scrollBarSlider, radius, swatch, S_scrollbarSlider);
             painter->save();
             painter->setRenderHint(QPainter::Antialiasing);
@@ -3882,7 +3935,13 @@ int BaseStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const
         val = 1;
         break;
     case PM_MenuVMargin:
+        // val = Phantom::DefaultFrame_Radius + 5;
+        val = 0;
+        break;
     case PM_MenuHMargin:
+        // val = Phantom::DefaultFrame_Radius + 5;
+        val = 0;
+        break;
     case PM_MenuPanelWidth:
         val = 0;
         break;
