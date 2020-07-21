@@ -37,6 +37,7 @@
 #include <QPoint>
 #include <QPolygon>
 #include <QPushButton>
+#include <QProgressBar>
 #include <QScrollBar>
 #include <QSharedData>
 #include <QSlider>
@@ -300,6 +301,8 @@ namespace Phantom
                 S_highlightedText,
                 S_scrollbarGutter,
                 S_scrollbarSlider,
+                S_scrollbarSlider_hover,
+                S_scrollbarSlider_pressed,
                 S_window_outline,
                 S_window_specular,
                 S_window_divider,
@@ -404,6 +407,8 @@ namespace Phantom
             colors[S_highlightedText] = pal.color(QPalette::HighlightedText);
             colors[S_scrollbarGutter] = isLight ? Dc::gutterColorOf(pal) : Dc::darkGutterColorOf(pal);
             colors[S_scrollbarSlider] = isLight ? colors[S_button] : Dc::adjustLightness(colors[S_window], 0.2);
+            colors[S_scrollbarSlider_hover] = isLight ? Dc::adjustLightness(colors[S_button], -0.2) : Dc::adjustLightness(colors[S_window], 0.3);
+            colors[S_scrollbarSlider_pressed] = isLight ? Dc::adjustLightness(colors[S_button], -0.4) : Dc::adjustLightness(colors[S_window], 0.35);
 
             colors[S_window_outline] =
                 isLight ? Dc::adjustLightness(colors[S_window], -0.1) : Dc::adjustLightness(colors[S_window], 0.03);
@@ -3601,8 +3606,18 @@ void BaseStyle::drawComplexControl(ComplexControl control,
         if (scrollBar->subControls & SC_ScrollBarSlider) {
             qreal radius =
                 (scrollBar->orientation == Qt::Horizontal ? scrollBarSlider.height() : scrollBarSlider.width()) / 2.0;
-            painter->fillRect(scrollBarSlider, swatch.color(S_window));
-            Ph::paintSolidRoundRect(painter, scrollBarSlider, radius, swatch, S_scrollbarSlider);
+            bool mouseOver((option->state & State_Active) && option->state & State_MouseOver);
+            bool mousePress(option->state & State_Sunken);
+            // painter->fillRect(scrollBarSlider, swatch.color(S_window));
+            // Ph::paintSolidRoundRect(painter, scrollBarSlider, radius, swatch, S_scrollbarSlider);
+            painter->save();
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(mouseOver ? swatch.brush(S_scrollbarSlider_hover) : swatch.brush(S_scrollbarSlider));
+            if (mousePress)
+                painter->setBrush(swatch.brush(S_scrollbarSlider_pressed));
+            painter->drawRoundedRect(scrollBarSlider, radius, radius);
+            painter->restore();
         }
 
         // The SubLine (up/left) buttons
@@ -3857,7 +3872,7 @@ int BaseStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const
         val = 24;
         break;
     case PM_ScrollBarExtent:
-        val = 12;
+        val = 14;
         break;
     case PM_SliderThickness:
     case PM_SliderLength:
@@ -4296,6 +4311,43 @@ void BaseStyle::polish(QApplication* app)
     // stylesheet.append(getAppStyleSheet());
     // app->setStyleSheet(stylesheet);
     // QCommonStyle::polish(app);
+}
+
+void BaseStyle::polish(QWidget *widget)
+{
+    QCommonStyle::polish(widget);
+    if (false
+            || qobject_cast<QAbstractButton*>(widget)
+            || qobject_cast<QComboBox *>(widget)
+            || qobject_cast<QProgressBar *>(widget)
+            || qobject_cast<QScrollBar *>(widget)
+            || qobject_cast<QSplitterHandle *>(widget)
+            || qobject_cast<QAbstractSlider *>(widget)
+            || qobject_cast<QAbstractSpinBox *>(widget)
+            || (widget->inherits("QDockSeparator"))
+            || (widget->inherits("QDockWidgetSeparator"))
+            ) {
+        widget->setAttribute(Qt::WA_Hover, true);
+        widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
+    }
+}
+
+void BaseStyle::unpolish(QWidget *widget)
+{
+    QCommonStyle::unpolish(widget);
+    if (false
+            || qobject_cast<QAbstractButton*>(widget)
+            || qobject_cast<QComboBox *>(widget)
+            || qobject_cast<QProgressBar *>(widget)
+            || qobject_cast<QScrollBar *>(widget)
+            || qobject_cast<QSplitterHandle *>(widget)
+            || qobject_cast<QAbstractSlider *>(widget)
+            || qobject_cast<QAbstractSpinBox *>(widget)
+            || (widget->inherits("QDockSeparator"))
+            || (widget->inherits("QDockWidgetSeparator"))
+            ) {
+        widget->setAttribute(Qt::WA_Hover, false);
+    }
 }
 
 QRect BaseStyle::subControlRect(ComplexControl control,

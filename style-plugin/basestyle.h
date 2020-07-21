@@ -86,6 +86,8 @@ public:
 
     using QCommonStyle::polish;
     void polish(QApplication* app) override;
+    void polish(QWidget *widget) override;
+    void unpolish(QWidget *widget) override;
 
 protected:
     /**
