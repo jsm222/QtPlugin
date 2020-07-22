@@ -93,14 +93,10 @@ void BlurHelper::update(QWidget *widget) const
     if (!(widget->testAttribute(Qt::WA_WState_Created) || widget->internalWinId()))
         return;
 
-    // 单独处理 QMenu
-    if (widget->inherits("QMenu")) {
-        QPainterPath path;
-        const int radius = ModernStyle::frameRadius;
-        path.addRoundedRect(widget->rect().adjusted(radius, radius, -radius, -radius), radius, radius);
-        KWindowEffects::enableBlurBehind(widget->winId(), true, path.toFillPolygon().toPolygon());
-    } else {
+    if (widget->mask().isEmpty()) {
         KWindowEffects::enableBlurBehind(widget->winId(), true);
+    } else {
+        KWindowEffects::enableBlurBehind(widget->winId(), true, widget->mask());
     }
 
     // force update

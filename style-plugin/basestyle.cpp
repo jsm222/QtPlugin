@@ -23,6 +23,7 @@
 #include "basestyle.h"
 #include "phantomcolor.h"
 #include "shadowhelper.h"
+#include "blurhelper.h"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -60,6 +61,23 @@
 QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
 QT_END_NAMESPACE
+
+QRectF strokedRect( const QRectF &rect, const int penWidth )
+{
+    /* With a pen stroke width of 1, the rectangle should have each of its
+     * sides moved inwards by half a pixel. This allows the stroke to be
+     * pixel perfect instead of blurry from sitting between pixels and
+     * prevents the rectangle with a stroke from becoming larger than the
+     * original size of the rectangle.
+     */
+    qreal adjustment = 0.5 * penWidth;
+    return QRectF( rect ).adjusted( adjustment, adjustment, -adjustment, -adjustment );
+}
+
+QRectF strokedRect( const QRect &rect, const int penWidth )
+{
+    return strokedRect(QRectF(rect), penWidth);
+}
 
 extern void qt_blurImage(QImage &blurImage, qreal radius, bool quality, int transposed);
 
@@ -1381,7 +1399,8 @@ BaseStylePrivate::BaseStylePrivate()
 
 BaseStyle::BaseStyle()
     : d(new BaseStylePrivate),
-      m_shadowHelper(new ShadowHelper(this))
+      m_shadowHelper(new ShadowHelper(this)),
+      m_blurHelper(new BlurHelper(this))
 {
     setObjectName(QLatin1String("Phantom"));
 
@@ -2129,10 +2148,20 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         const int radius = Phantom::DefaultFrame_Radius;
         painter->save();
         painter->setRenderHint(QPainter::Antialiasing);
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(swatch.color(S_window));
-        // QRect bgRect(option->rect.adjusted(radius, radius, -radius, -radius));
-        painter->drawRoundedRect(option->rect, radius, radius);
+        painter->setPen(swatch.color(S_frame_outline));
+        QColor background(swatch.color(S_window));
+        // background.setAlpha(100);
+        painter->setBrush(background);
+        QRectF frameRect = strokedRect(option->rect, 1);
+        painter->drawRoundedRect(frameRect, radius, radius);
+
+//        if (widget && widget->window()) {
+//            QPainterPath path;
+//            path.addRoundedRect(option->rect, radius, radius);
+//            const_cast<QWidget *>(widget)->setMask(path.toFillPolygon().toPolygon());
+//            m_blurHelper->registerWidget(widget->window());
+//        }
+
         painter->restore();
         break;
     }
@@ -4380,7 +4409,11 @@ void BaseStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
 
-    if (qobject_cast<QMenu *>(widget) || widget->inherits("QTipLabel")) {
+    if (qobject_cast<QMenu *>(widget)) {
+        widget->setAttribute(Qt::WA_TranslucentBackground, true);
+    }
+
+    if (widget->inherits("QTipLabel")) {
         widget->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
@@ -4405,6 +4438,10 @@ void BaseStyle::unpolish(QWidget *widget)
     }
 
     if (qobject_cast<QMenu *>(widget)) {
+        widget->setAttribute(Qt::WA_TranslucentBackground, false);
+    }
+
+    if (widget->inherits("QTipLabel")) {
         widget->setAttribute(Qt::WA_TranslucentBackground, false);
     }
 
