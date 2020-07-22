@@ -22,8 +22,8 @@
 HintsSettings::HintsSettings(QObject *parent)
     : QObject(parent)
 {
-    m_hints[QPlatformTheme::SystemIconThemeName] = "panda";
-    m_hints[QPlatformTheme::StyleNames] = "panda";
+    m_hints[QPlatformTheme::SystemIconThemeName] = "Lucia";
+    m_hints[QPlatformTheme::StyleNames] = "Lucia";
     m_hints[QPlatformTheme::SystemIconFallbackThemeName] = QStringLiteral("hicolor");
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
 }
