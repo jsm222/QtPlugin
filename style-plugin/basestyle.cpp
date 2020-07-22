@@ -428,9 +428,9 @@ namespace Phantom
             colors[S_highlight] = pal.color(QPalette::Highlight);
             colors[S_highlightedText] = pal.color(QPalette::HighlightedText);
             colors[S_scrollbarGutter] = isLight ? Dc::gutterColorOf(pal) : Dc::darkGutterColorOf(pal);
-            colors[S_scrollbarSlider] = isLight ? colors[S_button] : Dc::adjustLightness(colors[S_window], 0.2);
-            colors[S_scrollbarSlider_hover] = isLight ? Dc::adjustLightness(colors[S_button], -0.2) : Dc::adjustLightness(colors[S_window], 0.3);
-            colors[S_scrollbarSlider_pressed] = isLight ? Dc::adjustLightness(colors[S_button], -0.4) : Dc::adjustLightness(colors[S_window], 0.35);
+            colors[S_scrollbarSlider] = isLight ? colors[S_button] : Dc::adjustLightness(colors[S_window], 0.1);
+            colors[S_scrollbarSlider_hover] = isLight ? Dc::adjustLightness(colors[S_button], -0.1) : Dc::adjustLightness(colors[S_window], 0.2);
+            colors[S_scrollbarSlider_pressed] = isLight ? Dc::adjustLightness(colors[S_button], -0.2) : Dc::adjustLightness(colors[S_window], 0.25);
 
             colors[S_window_outline] =
                 isLight ? Dc::adjustLightness(colors[S_window], -0.1) : Dc::adjustLightness(colors[S_window], 0.03);
