@@ -1552,6 +1552,23 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         Ph::drawCheck(painter, d->checkBox_pen_scratch, r_, swatch, fgColor);
         break;
     }
+    case PE_PanelTipLabel: {
+        // force registration of widget
+        if (widget && widget->window()) {
+            m_shadowHelper->registerWidget(widget->window(), true);
+        }
+
+        const auto &palette = option->palette;
+        const auto &background = palette.color(QPalette::ToolTipBase);
+        const qreal radius = Phantom::DefaultFrame_Radius;
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(background);
+        painter->drawRoundedRect(option->rect, radius, radius);
+        painter->restore();
+        break;
+    }
         // Called for the content area on tree view rows that are selected
     case PE_PanelItemViewItem: {
         QCommonStyle::drawPrimitive(elem, option, painter, widget);
@@ -4363,7 +4380,7 @@ void BaseStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
 
-    if (qobject_cast<QMenu *>(widget)) {
+    if (qobject_cast<QMenu *>(widget) || widget->inherits("QTipLabel")) {
         widget->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
