@@ -22,6 +22,7 @@
 
 #include "basestyle.h"
 #include "phantomcolor.h"
+#include "shadowhelper.h"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -1379,9 +1380,13 @@ BaseStylePrivate::BaseStylePrivate()
 }
 
 BaseStyle::BaseStyle()
-    : d(new BaseStylePrivate)
+    : d(new BaseStylePrivate),
+      m_shadowHelper(new ShadowHelper(this))
 {
     setObjectName(QLatin1String("Phantom"));
+
+    m_shadowHelper->setFrameRadius(Phantom::DefaultFrame_Radius);
+    m_shadowHelper->loadConfig();
 }
 
 BaseStyle::~BaseStyle()
@@ -2091,7 +2096,7 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         break;
     }
     case PE_PanelMenu: {
-        bool isBelowMenuBar = false;
+        // bool isBelowMenuBar = false;
         // works but currently unused
         // QPoint gp = widget->mapToGlobal(widget->rect().topLeft());
         // gp.setY(gp.y() - 1);
@@ -2099,52 +2104,19 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         // if (bar && bar->inherits("QMenuBar")) {
         //   isBelowMenuBar = true;
         // }
-        Ph::fillRectOutline(painter, option->rect, 1, swatch.color(S_window_divider));
-        QRect bgRect = option->rect.adjusted(1, isBelowMenuBar ? 0 : 1, -1, -1);
-        painter->fillRect(bgRect, swatch.color(S_window));
 
-        // painter->save();
-        // int radius = Phantom::DefaultFrame_Radius;
-        // QPainterPath rectPath;
-        // rectPath.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
+        // Ph::fillRectOutline(painter, option->rect, 1, swatch.color(S_window_divider));
+        // QRect bgRect = option->rect.adjusted(1, isBelowMenuBar ? 0 : 1, -1, -1);
+        // painter->fillRect(bgRect, swatch.color(S_window));
 
-        // QPixmap pixmap(option->rect.size());
-        // pixmap.fill(Qt::transparent);
-        // QPainter pixmapPainter(&pixmap);
-        // pixmapPainter.setRenderHint(QPainter::Antialiasing);
-        // pixmapPainter.setPen(Qt::transparent);
-        // pixmapPainter.setBrush(Qt::black);
-        // pixmapPainter.drawPath(rectPath);
-        // pixmapPainter.end();
-
-        // QImage img = pixmap.toImage();
-        // qt_blurImage(img, radius, false, false);
-
-        // pixmap = QPixmap::fromImage(img);
-        // QPainter pixmapPainter2(&pixmap);
-        // pixmapPainter2.setRenderHint(QPainter::Antialiasing);
-        // pixmapPainter2.setCompositionMode(QPainter::CompositionMode_Clear);
-        // pixmapPainter2.setPen(Qt::transparent);
-        // pixmapPainter2.setBrush(Qt::transparent);
-        // pixmapPainter2.drawPath(rectPath);
-        // painter->drawPixmap(option->rect, pixmap, pixmap.rect());
-
-        // QColor color = option->palette.color(QPalette::Base);
-        // color.setAlpha(200);
-        // painter->setPen(Qt::transparent);
-        // painter->setBrush(color);
-
-        // QPainterPath path;
-        // QRegion region = widget->mask();
-        // if (region.isEmpty()) {
-        //     path.addRoundedRect(option->rect.adjusted(radius, radius, -radius, -radius), radius, radius);
-        // } else {
-        //     path.addRegion(region);
-        // }
-
-        // painter->drawPath(path);
-        // painter->restore();
-
+        const int radius = Phantom::DefaultFrame_Radius;
+        painter->save();
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(swatch.color(S_window));
+        // QRect bgRect(option->rect.adjusted(radius, radius, -radius, -radius));
+        painter->drawRoundedRect(option->rect, radius, radius);
+        painter->restore();
         break;
     }
     case Phantom_PE_ScrollBarSliderVertical: {
@@ -2690,14 +2662,14 @@ void BaseStyle::drawControl(ControlElement element,
         bool hasSubMenu = menuItem->menuItemType == QStyleOptionMenuItem::SubMenu;
         if (isSelected) {
             Swatchy fillColor = isSunken ? S_highlight_outline : S_highlight;
-            painter->fillRect(option->rect, swatch.color(fillColor));
+            // painter->fillRect(option->rect, swatch.color(fillColor));
             // rekols: Add rounded rectangle.
-            // painter->save();
-            // painter->setPen(Qt::NoPen);
-            // painter->setBrush(swatch.color(fillColor));
-            // painter->setRenderHint(QPainter::Antialiasing);
-            // painter->drawRoundedRect(option->rect, Phantom::DefaultFrame_Radius, Phantom::DefaultFrame_Radius);
-            // painter->restore();
+            painter->save();
+            painter->setPen(Qt::NoPen);
+            painter->setBrush(swatch.color(fillColor));
+            painter->setRenderHint(QPainter::Antialiasing);
+            painter->drawRoundedRect(option->rect, Phantom::DefaultFrame_Radius, Phantom::DefaultFrame_Radius);
+            painter->restore();
         }
 
         if (isCheckable) {
@@ -3935,12 +3907,10 @@ int BaseStyle::pixelMetric(PixelMetric metric, const QStyleOption* option, const
         val = 1;
         break;
     case PM_MenuVMargin:
-        // val = Phantom::DefaultFrame_Radius + 5;
-        val = 0;
+        val = Phantom::DefaultFrame_Radius;
         break;
     case PM_MenuHMargin:
-        // val = Phantom::DefaultFrame_Radius + 5;
-        val = 0;
+        val = Phantom::DefaultFrame_Radius;
         break;
     case PM_MenuPanelWidth:
         val = 0;
@@ -4187,11 +4157,11 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         }
         if (!anySeps)
             break;
-        int fheight = option->fontMetrics.height();
-        int vmargin = static_cast<int>(fheight * Ph::MenuItem_SeparatorHeightFontRatio) / 2;
-        QSize sz = size;
-        sz.setHeight(sz.height() + vmargin);
-        return sz;
+        // int fheight = option->fontMetrics.height();
+        // int vmargin = static_cast<int>(fheight * Ph::MenuItem_SeparatorHeightFontRatio) / 2;
+        // QSize sz = size;
+        // sz.setHeight(sz.height() + vmargin);
+        return size;
     }
     case CT_TabBarTab: {
         // Placeholder in case we change this in the future
@@ -4351,6 +4321,9 @@ void BaseStyle::polish(QApplication* app)
     QCommonStyle::polish(app);
 
     app->setPalette(standardPalette());
+    // QFont font("Noto Sans");
+    // font.setPixelSize(15);
+    // app->setFont(font);
 
     // if (!app) {
     //     return;
@@ -4389,6 +4362,12 @@ void BaseStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_Hover, true);
         widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
     }
+
+    if (qobject_cast<QMenu *>(widget)) {
+        widget->setAttribute(Qt::WA_TranslucentBackground, true);
+    }
+
+    m_shadowHelper->registerWidget(widget);
 }
 
 void BaseStyle::unpolish(QWidget *widget)
@@ -4407,6 +4386,12 @@ void BaseStyle::unpolish(QWidget *widget)
             ) {
         widget->setAttribute(Qt::WA_Hover, false);
     }
+
+    if (qobject_cast<QMenu *>(widget)) {
+        widget->setAttribute(Qt::WA_TranslucentBackground, false);
+    }
+
+    m_shadowHelper->unregisterWidget(widget);
 }
 
 QRect BaseStyle::subControlRect(ComplexControl control,
@@ -4611,7 +4596,18 @@ QRect BaseStyle::subControlRect(ComplexControl control,
             return visualRect(option->direction, option->rect, r);
         }
         case SC_ComboBoxListBoxPopup: {
-            return cb->rect;
+            //return cb->rect;
+            //rekols
+            QSize size = proxy()->sizeFromContents(CT_Menu, option, option->rect.size(), widget);
+            QRect rect = option->rect;
+            if (auto styleOption = static_cast<const QStyleOption *>(option)) {
+                if (auto menuItem = static_cast<const QStyleOptionMenuItem *>(styleOption)) {
+                    if (menuItem->icon.isNull()) {
+                        rect.setWidth(size.width());
+                    }
+                }
+            }
+            return rect;
         }
         default:
             break;
@@ -4758,6 +4754,10 @@ int BaseStyle::styleHint(StyleHint hint,
                          const QWidget* widget,
                          QStyleHintReturn* returnData) const
 {
+    if (auto menu = qobject_cast<const QMenu *>(widget)) {
+        const_cast<QWidget *>(widget)->setAttribute(Qt::WA_TranslucentBackground);
+    }
+
     switch (hint) {
     case SH_Slider_SnapToValue:
     case SH_PrintDialog_RightAlignButtons:
@@ -4946,86 +4946,3 @@ QRect BaseStyle::subElementRect(SubElement sr, const QStyleOption* opt, const QW
     }
     return QCommonStyle::subElementRect(sr, opt, w);
 }
-
-// Table header layout reference
-// -----------------------------
-//
-// begin:  QStyleOptionHeader::Beginning;
-// mid:    QStyleOptionHeader::Middle;
-// end:    QStyleOptionHeader::End;
-// one:    QStyleOptionHeader::OnlyOneSection;
-// one*:
-//   This is specified as QStyleOptionHeader::OnlyOneSection, but the call to
-//   drawControl(CE_HeaderSection...) is being performed by an instance of
-//   QTableCornerButton, defined in qtableview.cpp as a subclass of
-//   QAbstractButton. Only table views can have these corner buttons, and they
-//   only appear if there are both at least 1 column and 1 row visible.
-//
-// Configuration A: A table view with both columns and rows
-//
-// Configuration B: A list view, or a tree view, or a table view with no rows
-// in the data or all rows hidden, such that the corner button is also made
-// hidden.
-//
-// Configuration C: A table view with no columns in the data or all columns
-// hidden, such that the corner button is also made hidden.
-//
-// Configuration A, Left-to-right, 4x4
-// [ one*  ][ begin ][ mid ][ mid ][ end ]
-// [ begin ]
-// [ mid   ]
-// [ mid   ]
-// [ end   ]
-//
-// Configuration A, Left-to-right, 2x2
-// [ one*  ][ begin ][ end ]
-// [ begin ]
-// [ end   ]
-//
-// Configuration A, Left-to-right, 1x1
-// [ one* ][ one ]
-// [ one  ]
-//
-// Configuration A, Right-to-left, 4x4
-// [ begin ][ mid ][ mid ][ end ][ one*  ]
-//                               [ begin ]
-//                               [ mid   ]
-//                               [ mid   ]
-//                               [ end   ]
-//
-// Configuration A, Right-to-left, 2x2
-//               [ begin ][ end ][ one*  ]
-//                               [ begin ]
-//                               [ end   ]
-//
-// Configuration A, Right-to-left, 1x1
-//                         [ one ][ one* ]
-//                                [ one  ]
-//
-// Configuration B, Left-to-right and right-to-left, 4 columns (table view:
-// 4 columns with 0 rows, list/tree view: 4 columns, rows count doesn't matter):
-// [ begin ][ mid ][ mid ][ end ]
-//
-// Configuration B, Left-to-right and right-to-left, 2 columns (table view:
-// 2 columns with 0 rows, list/tree view: 2 columns, rows count doesn't matter):
-// [ begin ][ end ]
-//
-// Configuration B, Left-to-right and right-to-left, 1 column (table view:
-// 1 column with 0 rows, list view: 1 column, rows count doesn't matter):
-// [ one ]
-//
-// Configuration C, left-to-right and right-to-left, table view with no columns
-// and 4 rows:
-// [ begin ]
-// [ mid   ]
-// [ mid   ]
-// [ end   ]
-//
-// Configuration C, left-to-right and right-to-left, table view with no columns
-// and 2 rows:
-// [ begin ]
-// [ end   ]
-//
-// Configuration C, left-to-right and right-to-left, table view with no columns
-// and 1 row:
-// [ one ]

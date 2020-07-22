@@ -29,6 +29,12 @@ set (SRCS
     basestyle.cpp
     phantomcolor.h
     phantomcolor.cpp
+    shadowhelper.h
+    shadowhelper.cpp
+    tileset.h
+    tileset.cpp
+    boxshadowrenderer.h
+    boxshadowrenderer.cpp
 )
 
 add_library(${TARGET} MODULE ${SRCS})

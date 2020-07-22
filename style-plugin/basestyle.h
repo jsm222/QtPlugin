@@ -26,7 +26,7 @@
 #include <QCommonStyle>
 
 class BaseStylePrivate;
-
+class ShadowHelper;
 class BaseStyle : public QCommonStyle
 {
     Q_OBJECT
@@ -99,6 +99,9 @@ protected:
     }
 
     BaseStylePrivate* d;
+
+private:
+    ShadowHelper *m_shadowHelper;
 };
 
 #endif
