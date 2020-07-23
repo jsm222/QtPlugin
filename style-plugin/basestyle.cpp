@@ -98,7 +98,7 @@ namespace Phantom
         constexpr qint16 SplitterMaxLength = 25; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
         constexpr qint16 MenuBar_FrameWidth = 6;
-        constexpr qint16 MenuBar_ItemSpacing = 6;
+        constexpr qint16 MenuBar_ItemSpacing = 10;
         constexpr qint16 SpinBox_ButtonWidth = 15;
 
         // These two are currently not based on font, but could be

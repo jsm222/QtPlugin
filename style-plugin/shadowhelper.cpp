@@ -205,7 +205,7 @@ TileSet ShadowHelper::shadowTiles()
 
     const QColor color = Qt::black;
     // const qreal strength = static_cast<qreal>(255) / 255.0;
-    const qreal strength = 1.2;
+    const qreal strength = 1.5;
 
     const QSize boxSize = BoxShadowRenderer::calculateMinimumBoxSize(params.shadow1.radius)
         .expandedTo(BoxShadowRenderer::calculateMinimumBoxSize(params.shadow2.radius));
