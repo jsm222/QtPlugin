@@ -95,7 +95,7 @@ namespace Phantom
     namespace
     {
         constexpr qint16 DefaultFrameWidth = 6;
-        constexpr qint16 SplitterMaxLength = 25; // Length of splitter handle (not thickness)
+        constexpr qint16 SplitterMaxLength = 100; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
         constexpr qint16 MenuBar_FrameWidth = 6;
         constexpr qint16 MenuBar_ItemSpacing = 10;
@@ -2264,20 +2264,25 @@ void BaseStyle::drawControl(ControlElement element,
         if (r.width() < 5 || r.height() < 5)
             break;
         int length = Ph::dpiScaled(Ph::SplitterMaxLength);
-        int thickness = Ph::dpiScaled(1);
+        // int thickness = Ph::dpiScaled(1);
+        qreal radius = 0;
         QSize size;
         if (option->state & State_Horizontal) {
             if (r.height() < length)
                 length = r.height();
-            size = QSize(thickness, length);
+            // size = QSize(thickness, length);
+            size = QSize(r.width() / 2, length);
+            radius = r.width() * 0.3;
         } else {
             if (r.width() < length)
                 length = r.width();
-            size = QSize(length, thickness);
+            // size = QSize(length, thickness);
+            size = QSize(length, r.height() / 2);
+            radius = r.height() * 0.3;
         }
         QRect filledRect = QStyle::alignedRect(option->direction, Qt::AlignCenter, size, r);
-        painter->fillRect(filledRect, swatch.color(S_button_specular));
-        Ph::fillRectOutline(painter, filledRect.adjusted(-1, 0, 1, 0), 1, swatch.color(S_window_divider));
+        Ph::paintSolidRoundRect(painter, filledRect, radius, swatch, S_button_specular);
+        // Ph::fillRectOutline(painter, filledRect.adjusted(-1, 0, 1, 0), 1, swatch.color(S_window_divider));
         break;
     }
     // TODO update this for phantom
