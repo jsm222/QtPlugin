@@ -50,23 +50,23 @@ const CompositeShadowParams s_shadowParams[] = {
     // Small
     CompositeShadowParams(
         QPoint(0, 3),
-        ShadowParams(QPoint(0, 0), 12, 0.26),
-        ShadowParams(QPoint(0, -2), 6, 0.16)),
+        ShadowParams(QPoint(0, 0), 16, 0.26),
+        ShadowParams(QPoint(0, -2), 8, 0.16)),
     // Medium
     CompositeShadowParams(
         QPoint(0, 4),
-        ShadowParams(QPoint(0, 0), 16, 0.24),
-        ShadowParams(QPoint(0, -2), 8, 0.14)),
+        ShadowParams(QPoint(0, 0), 20, 0.24),
+        ShadowParams(QPoint(0, -2), 10, 0.14)),
     // Large
     CompositeShadowParams(
         QPoint(0, 5),
-        ShadowParams(QPoint(0, 0), 20, 0.22),
-        ShadowParams(QPoint(0, -3), 10, 0.12)),
+        ShadowParams(QPoint(0, 0), 24, 0.22),
+        ShadowParams(QPoint(0, -3), 12, 0.12)),
     // Very Large
     CompositeShadowParams(
         QPoint(0, 6),
-        ShadowParams(QPoint(0, 0), 24, 0.2),
-        ShadowParams(QPoint(0, -3), 12, 0.1))
+        ShadowParams(QPoint(0, 0), 32, 0.2),
+        ShadowParams(QPoint(0, -3), 16, 0.1))
 };
 
 
@@ -189,7 +189,7 @@ bool ShadowHelper::eventFilter( QObject* object, QEvent* event )
 
 TileSet ShadowHelper::shadowTiles()
 {
-    const CompositeShadowParams params = lookupShadowParams(ShadowLarge);
+    const CompositeShadowParams params = lookupShadowParams(ShadowVeryLarge);
 
     if (params.isNone()) {
         return TileSet();
@@ -276,7 +276,7 @@ bool ShadowHelper::isMenu( QWidget* widget ) const
 
 bool ShadowHelper::isToolTip( QWidget* widget ) const
 {
-    return widget->inherits( "QTipLabel" ) || (widget->windowFlags() & Qt::WindowType_Mask) == Qt::ToolTip; 
+    return widget->inherits( "QTipLabel" ) || (widget->windowFlags() & Qt::WindowType_Mask) == Qt::ToolTip;
 }
 
 bool ShadowHelper::isDockWidget( QWidget* widget ) const
@@ -286,7 +286,7 @@ bool ShadowHelper::isDockWidget( QWidget* widget ) const
 
 bool ShadowHelper::isToolBar( QWidget* widget ) const
 {
-    return qobject_cast<QToolBar*>( widget ); 
+    return qobject_cast<QToolBar*>( widget );
 }
 
 bool ShadowHelper::acceptWidget( QWidget* widget ) const
@@ -384,7 +384,7 @@ void ShadowHelper::installShadows( QWidget* widget )
 
 QMargins ShadowHelper::shadowMargins( QWidget* widget ) const
 {
-    const CompositeShadowParams params = lookupShadowParams(ShadowLarge);
+    const CompositeShadowParams params = lookupShadowParams(ShadowVeryLarge);
     if (params.isNone()) {
         return QMargins();
     }
