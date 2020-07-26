@@ -19,12 +19,8 @@ include(ECMQueryQmake)
 set (SRCS
     blurhelper.cpp
     blurhelper.h
-    # modernstyle.cpp
-    # modernstyle.h
     pstyleplugin.cpp
     pstyleplugin.h
-    # stylehelper.h
-    # styleutils.cpp
     basestyle.h
     basestyle.cpp
     phantomcolor.h
