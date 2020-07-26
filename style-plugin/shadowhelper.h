@@ -30,8 +30,6 @@
 #include <QMargins>
 #include <QSet>
 
-using namespace Breeze;
-
 struct ShadowParams
 {
     ShadowParams() = default;
@@ -85,9 +83,6 @@ public:
     //* reset
     void reset();
 
-    //* load config
-    void loadConfig();
-
     //* register widget
     bool registerWidget( QWidget*, bool force = false );
 
@@ -101,7 +96,9 @@ public:
 
     //* shadow tiles
     /** is public because it is also needed for mdi windows */
-    TileSet shadowTiles();
+    // TileSet shadowTiles();
+
+    TileSet shadowTiles(const qreal frameRadius);
 
 protected Q_SLOTS:
     //* unregister widget
@@ -123,20 +120,19 @@ protected:
     //* accept widget
     bool acceptWidget( QWidget* ) const;
 
-    // create shared shadow tiles from tileset
-    const QVector<KWindowShadowTile::Ptr>& createShadowTiles();
-
     // create shadow tile from pixmap
     KWindowShadowTile::Ptr createTile( const QPixmap& );
 
     //* installs shadow on given widget in a platform independent way
-    void installShadows( QWidget * );
+    // void installShadows( QWidget * );
+
+    void installShadows(QWidget *widget, TileSet shadowTiles);
 
     //* uninstalls shadow on given widget in a platform independent way
     void uninstallShadows( QWidget * );
 
     //* gets the shadow margins for the given widget
-    QMargins shadowMargins( QWidget* ) const;
+    QMargins shadowMargins(QWidget*, TileSet) const;
 
 private:
     //* registered widgets
@@ -145,10 +141,7 @@ private:
     //* managed shadows
     QMap<QWidget*, KWindowShadow*> _shadows;
 
-    //* tileset
-    TileSet _shadowTiles;
-
-    qreal _frameRadius = 6;
+    qreal _frameRadius = 5;
 
     //* number of tiles
     enum { numTiles = 8 };

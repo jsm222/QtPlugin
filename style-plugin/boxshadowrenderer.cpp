@@ -25,9 +25,6 @@
 #include <QPainter>
 #include <QtMath>
 
-namespace Breeze
-{
-
 static inline int calculateBlurRadius(qreal stdDev)
 {
     // See https://www.w3.org/TR/SVG11/filters.html#feGaussianBlurElement
@@ -349,5 +346,3 @@ QSize BoxShadowRenderer::calculateMinimumShadowTextureSize(const QSize &boxSize,
 {
     return boxSize + 2 * calculateBlurExtent(radius) + QSize(qAbs(offset.x()), qAbs(offset.y()));
 }
-
-} // namespace Breeze

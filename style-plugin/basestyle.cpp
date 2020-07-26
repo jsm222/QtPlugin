@@ -1405,7 +1405,6 @@ BaseStyle::BaseStyle()
     setObjectName(QLatin1String("Phantom"));
 
     m_shadowHelper->setFrameRadius(Phantom::DefaultFrame_Radius);
-    m_shadowHelper->loadConfig();
 }
 
 BaseStyle::~BaseStyle()

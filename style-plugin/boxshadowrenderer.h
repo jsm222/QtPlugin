@@ -24,9 +24,6 @@
 #include <QPoint>
 #include <QSize>
 
-namespace Breeze
-{
-
 class BoxShadowRenderer
 {
 public:
@@ -98,5 +95,3 @@ private:
 
     QVector<Shadow> m_shadows;
 };
-
-} // namespace Breeze
