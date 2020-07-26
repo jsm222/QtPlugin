@@ -4417,7 +4417,7 @@ void BaseStyle::polish(QWidget *widget)
         widget->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
-    if (widget->inherits("QTipLabel")) {
+    if (widget->inherits("QTipLabel") || widget->inherits("QComboBoxPrivateContainer")) {
         widget->setAttribute(Qt::WA_TranslucentBackground, true);
     }
 
