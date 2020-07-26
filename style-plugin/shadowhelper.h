@@ -1,6 +1,7 @@
 /*************************************************************************
  * Copyright (C) 2014 by Hugo Pereira Da Costa <hugo.pereira@free.fr>    *
  * Copyright (C) 2020 by Vlad Zahorodnii <vlad.zahorodnii@kde.org>       *
+ * Copyright (C) 2020, 2020 by Reven Martin <revenmartin@gmail.com>      *
  *                                                                       *
  * This program is free software; you can redistribute it and/or modify  *
  * it under the terms of the GNU General Public License as published by  *
@@ -72,27 +73,24 @@ class ShadowHelper: public QObject
 
 public:
     //* constructor
-    ShadowHelper(QObject*);
+    ShadowHelper(QObject *);
 
     //* destructor
     ~ShadowHelper() override;
 
     //* shadow params from size enum
-    static CompositeShadowParams lookupShadowParams( int shadowSizeEnum );
-
-    //* reset
-    void reset();
+    static CompositeShadowParams lookupShadowParams(int shadowSizeEnum);
 
     //* register widget
-    bool registerWidget( QWidget*, bool force = false );
+    bool registerWidget(QWidget *, bool force = false);
 
     //* unregister widget
-    void unregisterWidget( QWidget* );
+    void unregisterWidget(QWidget *);
 
     //* event filter
-    bool eventFilter( QObject*, QEvent* ) override;
+    bool eventFilter(QObject *, QEvent *) override;
 
-    void setFrameRadius(qreal radius) { _frameRadius = radius; }
+    void setFrameRadius(qreal radius) { m_frameRadius = radius; }
 
     //* shadow tiles
     /** is public because it is also needed for mdi windows */
@@ -102,26 +100,26 @@ public:
 
 protected Q_SLOTS:
     //* unregister widget
-    void objectDeleted( QObject* );
+    void objectDeleted(QObject *);
 
 protected:
     //* true if widget is a menu
-    bool isMenu( QWidget* ) const;
+    bool isMenu(QWidget *) const;
 
     //* true if widget is a tooltip
-    bool isToolTip( QWidget* ) const;
+    bool isToolTip(QWidget *) const;
 
     //* dock widget
-    bool isDockWidget( QWidget* ) const;
+    bool isDockWidget(QWidget *) const;
 
     //* toolbar
-    bool isToolBar( QWidget* ) const;
+    bool isToolBar(QWidget *) const;
 
     //* accept widget
-    bool acceptWidget( QWidget* ) const;
+    bool acceptWidget(QWidget *) const;
 
     // create shadow tile from pixmap
-    KWindowShadowTile::Ptr createTile( const QPixmap& );
+    KWindowShadowTile::Ptr createTile(const QPixmap &);
 
     //* installs shadow on given widget in a platform independent way
     // void installShadows( QWidget * );
@@ -129,25 +127,22 @@ protected:
     void installShadows(QWidget *widget, TileSet shadowTiles);
 
     //* uninstalls shadow on given widget in a platform independent way
-    void uninstallShadows( QWidget * );
+    void uninstallShadows(QWidget *);
 
     //* gets the shadow margins for the given widget
     QMargins shadowMargins(QWidget*, TileSet) const;
 
 private:
     //* registered widgets
-    QSet<QWidget*> _widgets;
+    QSet<QWidget *> m_widgets;
 
     //* managed shadows
-    QMap<QWidget*, KWindowShadow*> _shadows;
+    QMap<QWidget *, KWindowShadow *> m_shadows;
 
-    qreal _frameRadius = 5;
+    qreal m_frameRadius;
 
     //* number of tiles
     enum { numTiles = 8 };
-
-    //* shared shadow tiles
-    QVector<KWindowShadowTile::Ptr> _tiles;
 };
 
 #endif

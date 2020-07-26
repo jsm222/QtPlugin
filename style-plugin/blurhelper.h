@@ -42,7 +42,7 @@ public:
 
     void registerWidget(QWidget *);
     void unregisterWidget(QWidget *);
-    bool eventFilter(QObject *, QEvent*) override;
+    bool eventFilter(QObject *, QEvent *) override;
 
 protected:
     void addEventFilter(QObject *object) {
