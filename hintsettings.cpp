@@ -19,17 +19,34 @@
 #include <QDBusConnection>
 #include <QDBusInterface>
 
+static const QByteArray s_systemFontName = QByteArrayLiteral("Font");
+static const QByteArray s_systemFixedFontName = QByteArrayLiteral("FixedFont");
+static const QByteArray s_systemPointFontSize = QByteArrayLiteral("FontSize");
+
 HintsSettings::HintsSettings(QObject *parent)
-    : QObject(parent)
+    : QObject(parent),
+      m_settings(new QSettings(QSettings::UserScope, "panda", "theme"))
 {
     m_hints[QPlatformTheme::SystemIconThemeName] = "Lucia";
     m_hints[QPlatformTheme::StyleNames] = "panda";
     m_hints[QPlatformTheme::SystemIconFallbackThemeName] = QStringLiteral("hicolor");
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
+    m_hints[QPlatformTheme::UseFullScreenForPopupMenu] = true;
+
+    m_settingsFile = m_settings->fileName();
+
+    QMetaObject::invokeMethod(this, "lazyInit", Qt::QueuedConnection);
 }
 
 HintsSettings::~HintsSettings()
 {
+}
+
+void HintsSettings::lazyInit()
+{
+    m_fileWatcher = new QFileSystemWatcher();
+    m_fileWatcher->addPath(m_settingsFile);
+    connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &HintsSettings::onFileChanged);
 }
 
 QStringList HintsSettings::xdgIconThemePaths() const
@@ -45,4 +62,47 @@ QStringList HintsSettings::xdgIconThemePaths() const
     }
 
     return paths;
+}
+
+QString HintsSettings::systemFont() const
+{
+    return m_settings->value(s_systemFontName, "Noto Sans").toString();
+}
+
+QString HintsSettings::systemFixedFont() const
+{
+    return m_settings->value(s_systemFixedFontName, "Monospace").toString();
+}
+
+qreal HintsSettings::systemFontPointSize() const
+{
+    return m_settings->value(s_systemPointFontSize, 10.5).toDouble();
+}
+
+void HintsSettings::onFileChanged(const QString &path)
+{
+    QVariantMap map;
+    for (const QString &value : m_settings->allKeys()) {
+        map[value] = m_settings->value(value);
+    }
+
+    m_settings->sync();
+
+    for (const QString &value : m_settings->allKeys()) {
+        const QVariant &oldValue = map.value(value);
+        const QVariant &newValue = m_settings->value(value);
+
+        if (oldValue != newValue) {
+            if (value == s_systemFontName)
+                emit systemFontChanged(newValue.toString());
+            else if (value == s_systemFixedFontName)
+                emit systemFixedFontChanged(newValue.toString());
+            else if (value == s_systemPointFontSize)
+                emit systemFontPointSizeChanged(newValue.toDouble());
+        }
+    }
+
+    bool fileDeleted = !m_fileWatcher->files().contains(m_settingsFile);
+    if (fileDeleted)
+        m_fileWatcher->addPath(m_settingsFile);
 }

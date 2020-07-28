@@ -1,15 +1,18 @@
 #include "pandaplatformtheme.h"
 #include "x11integration.h"
 #include "qdbusmenubar_p.h"
+#include "style-plugin/basestyle.h"
 
 #include <QApplication>
 #include <QFont>
 #include <QPalette>
 #include <QString>
 #include <QVariant>
-#include <QDBusConnection>
-#include <QDBusConnectionInterface>
 #include <QDebug>
+
+// Qt DBus
+#include <QDBusConnection>
+#include <QDBusInterface>
 
 #include <KWindowSystem>
 
@@ -31,14 +34,28 @@ static bool isDBusGlobalMenuAvailable()
 
 PandaPlatformTheme::PandaPlatformTheme()
 {
-    qDebug() << "init panda platform theme";
+    m_hints = new HintsSettings();
 
-    m_hints = new HintsSettings;
-    
+    qApp->setProperty("_hints_settings_object", (quintptr)m_hints);
+
     if (KWindowSystem::isPlatformX11()) {
         m_x11Integration.reset(new X11Integration());
         m_x11Integration->init();
     }
+
+    connect(m_hints, &HintsSettings::systemFontChanged, this, [=] {
+        QFont font = qApp->font();
+        font.setPointSizeF(m_hints->systemFontPointSize());
+        font.setFamily(m_hints->systemFont());
+        QApplication::setFont(font);
+    });
+
+    connect(m_hints, &HintsSettings::systemFontPointSizeChanged, this, [=] {
+        QFont font = qApp->font();
+        font.setPointSizeF(m_hints->systemFontPointSize());
+        QApplication::setFont(font);
+    });
+
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
 }
@@ -55,6 +72,32 @@ QVariant PandaPlatformTheme::themeHint(QPlatformTheme::ThemeHint hintType) const
     } else {
         return QPlatformTheme::themeHint(hintType);
     }
+}
+
+const QFont* PandaPlatformTheme::font(Font type) const
+{
+    switch (type) {
+    case SystemFont: {
+        const QString &fontName = m_hints->systemFont();
+        qreal fontSize = m_hints->systemFontPointSize();
+        static QFont font = QFont(QString());
+        font.setFamily(fontName);
+        font.setPointSizeF(fontSize);
+        return &font;
+    }
+    case FixedFont: {
+        const QString &fontName = m_hints->systemFixedFont();
+        qreal fontSize = m_hints->systemFontPointSize();
+        static QFont font = QFont(QString());
+        font.setFamily(fontName);
+        font.setPointSizeF(fontSize);
+        return &font;
+    }
+    default:
+        break;
+    }
+
+    return QPlatformTheme::font(type);
 }
 
 QPlatformMenuBar *PandaPlatformTheme::createPlatformMenuBar() const

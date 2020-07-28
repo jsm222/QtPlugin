@@ -62,6 +62,11 @@ QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
 QT_END_NAMESPACE
 
+static QObject *hintsSettings()
+{
+    return reinterpret_cast<QObject*>(qvariant_cast<quintptr>(qApp->property("_hints_settings_object")));
+}
+
 QRectF strokedRect( const QRectF &rect, const int penWidth )
 {
     /* With a pen stroke width of 1, the rectangle should have each of its
@@ -3113,7 +3118,7 @@ void BaseStyle::drawControl(ControlElement element,
     }
 }
 
-QPalette BaseStyle::standardPalette() const
+QPalette BaseStyle::lightModePalette() const
 {
     QPalette palette;
     palette.setColor(QPalette::Active, QPalette::Window, QRgb(0xF7F7F7));
@@ -3177,6 +3182,77 @@ QPalette BaseStyle::standardPalette() const
     palette.setColor(QPalette::Disabled, QPalette::LinkVisited, QRgb(0x3388FF));
 
     return palette;
+}
+
+QPalette BaseStyle::darkModePalette() const
+{
+    QPalette palette;
+    palette.setColor(QPalette::Active, QPalette::Window, QRgb(0x3B3B3D));
+    palette.setColor(QPalette::Inactive, QPalette::Window, QRgb(0x404042));
+    palette.setColor(QPalette::Disabled, QPalette::Window, QRgb(0x424242));
+
+    palette.setColor(QPalette::Active, QPalette::WindowText, QRgb(0xCACBCE));
+    palette.setColor(QPalette::Inactive, QPalette::WindowText, QRgb(0xC8C8C6));
+    palette.setColor(QPalette::Disabled, QPalette::WindowText, QRgb(0x707070));
+
+    palette.setColor(QPalette::Active, QPalette::Text, QRgb(0xCACBCE));
+    palette.setColor(QPalette::Inactive, QPalette::Text, QRgb(0xC8C8C6));
+    palette.setColor(QPalette::Disabled, QPalette::Text, QRgb(0x707070));
+
+#if (QT_VERSION >= QT_VERSION_CHECK(5, 12, 0))
+    palette.setColor(QPalette::Active, QPalette::PlaceholderText, QRgb(0x7D7D82));
+    palette.setColor(QPalette::Inactive, QPalette::PlaceholderText, QRgb(0x87888C));
+    palette.setColor(QPalette::Disabled, QPalette::PlaceholderText, QRgb(0x737373));
+#endif
+
+    palette.setColor(QPalette::Active, QPalette::BrightText, QRgb(0x252627));
+    palette.setColor(QPalette::Inactive, QPalette::BrightText, QRgb(0x2D2D2F));
+    palette.setColor(QPalette::Disabled, QPalette::BrightText, QRgb(0x333333));
+
+    palette.setColor(QPalette::Active, QPalette::Base, QRgb(0x27272A));
+    palette.setColor(QPalette::Inactive, QPalette::Base, QRgb(0x2A2A2D));
+    palette.setColor(QPalette::Disabled, QPalette::Base, QRgb(0x343437));
+
+    palette.setColor(QPalette::Active, QPalette::AlternateBase, QRgb(0x2C2C30));
+    palette.setColor(QPalette::Inactive, QPalette::AlternateBase, QRgb(0x2B2B2F));
+    palette.setColor(QPalette::Disabled, QPalette::AlternateBase, QRgb(0x36363A));
+
+    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x2D532D));
+    palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0xBFBFBF));
+
+    palette.setColor(QPalette::Active, QPalette::Button, QRgb(0x28282B));
+    palette.setColor(QPalette::Inactive, QPalette::Button, QRgb(0x28282B));
+    palette.setColor(QPalette::Disabled, QPalette::Button, QRgb(0x2B2A2A));
+
+    palette.setColor(QPalette::Active, QPalette::ButtonText, QRgb(0xB9B9BE));
+    palette.setColor(QPalette::Inactive, QPalette::ButtonText, QRgb(0x9E9FA5));
+    palette.setColor(QPalette::Disabled, QPalette::ButtonText, QRgb(0x73747E));
+
+    palette.setColor(QPalette::Active, QPalette::Highlight, QRgb(0x2D532D));
+    palette.setColor(QPalette::Inactive, QPalette::Highlight, QRgb(0x354637));
+    palette.setColor(QPalette::Disabled, QPalette::Highlight, QRgb(0x293D29));
+
+    palette.setColor(QPalette::Active, QPalette::HighlightedText, QRgb(0xCCCCCC));
+    palette.setColor(QPalette::Inactive, QPalette::HighlightedText, QRgb(0xCECECE));
+    palette.setColor(QPalette::Disabled, QPalette::HighlightedText, QRgb(0x707070));
+
+    palette.setColor(QPalette::All, QPalette::Light, QRgb(0x414145));
+    palette.setColor(QPalette::All, QPalette::Midlight, QRgb(0x39393C));
+    palette.setColor(QPalette::All, QPalette::Mid, QRgb(0x2F2F32));
+    palette.setColor(QPalette::All, QPalette::Dark, QRgb(0x202022));
+    palette.setColor(QPalette::All, QPalette::Shadow, QRgb(0x19191A));
+
+    palette.setColor(QPalette::All, QPalette::Link, QRgb(0x68B668));
+    palette.setColor(QPalette::Disabled, QPalette::Link, QRgb(0x74A474));
+    palette.setColor(QPalette::All, QPalette::LinkVisited, QRgb(0x75B875));
+    palette.setColor(QPalette::Disabled, QPalette::LinkVisited, QRgb(0x77A677));
+
+    return palette;
+}
+
+QPalette BaseStyle::standardPalette() const
+{
+    return lightModePalette();
 
     // QColor backGround(251, 251, 251);
     // QColor light = backGround.lighter(150);
@@ -4371,28 +4447,21 @@ void BaseStyle::polish(QApplication* app)
     QCommonStyle::polish(app);
 
     app->setPalette(standardPalette());
-    // QFont font("Noto Sans");
-    // font.setPixelSize(15);
-    // app->setFont(font);
 
-    // if (!app) {
-    //     return;
+    // if (QObject *obj = hintsSettings()) {
+    //     connect(obj, SIGNAL(systemFontChanged(QString)), this, SLOT(updateAppFont()));
+    //     connect(obj, SIGNAL(systemFontPointSizeChanged(qreal)), this, SLOT(updateAppFont()));
     // }
+}
 
-    // Q_INIT_RESOURCE(styles);
+void BaseStyle::unpolish(QApplication* app)
+{
+    QCommonStyle::unpolish(app);
 
-    // QString stylesheet;
-    // QFile baseStylesheetFile(":/styles/base/basestyle.qss");
-    // if (baseStylesheetFile.open(QIODevice::ReadOnly | QIODevice::Text)) {
-    //     stylesheet = baseStylesheetFile.readAll();
-    //     baseStylesheetFile.close();
-    // } else {
-    //     qWarning("Failed to load base theme stylesheet.");
+    // if (QObject *obj = hintsSettings()) {
+    //     disconnect(obj, SIGNAL(systemFontChanged(QString)), this, SLOT(updateAppFont()));
+    //     disconnect(obj, SIGNAL(systemFontPointSizeChanged(qreal)), this, SLOT(updateAppFont()));
     // }
-
-    // stylesheet.append(getAppStyleSheet());
-    // app->setStyleSheet(stylesheet);
-    // QCommonStyle::polish(app);
 }
 
 void BaseStyle::polish(QWidget *widget)

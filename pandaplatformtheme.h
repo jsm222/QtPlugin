@@ -12,13 +12,16 @@ class QIconEngine;
 class QWindow;
 class X11Integration;
 
-class PandaPlatformTheme : public QPlatformTheme
+class PandaPlatformTheme : public QObject, public QPlatformTheme
 {
+    Q_OBJECT
+
 public:
     PandaPlatformTheme();
     ~PandaPlatformTheme() override;
 
     QVariant themeHint(ThemeHint hint) const override;
+    const QFont *font(Font type) const override;
 
     QPlatformMenuBar *createPlatformMenuBar() const override;
     
@@ -31,6 +34,7 @@ public:
             return nullptr;
         }
     }
+
 private:
     HintsSettings *m_hints;
     QScopedPointer<X11Integration> m_x11Integration;
