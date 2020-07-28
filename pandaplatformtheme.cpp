@@ -1,7 +1,6 @@
 #include "pandaplatformtheme.h"
 #include "x11integration.h"
 #include "qdbusmenubar_p.h"
-#include "style-plugin/basestyle.h"
 
 #include <QApplication>
 #include <QFont>
@@ -125,7 +124,7 @@ QPlatformMenuBar *PandaPlatformTheme::createPlatformMenuBar() const
 //                 if (oldWindow) {
 //                     m_kwaylandIntegration->setAppMenu(oldWindow, QString(), QString());
 //                 }
-// 
+//
 //                 if (newWindow) {
 //                     m_kwaylandIntegration->setAppMenu(newWindow, serviceName, objectPath);
 //                 }

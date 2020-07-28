@@ -31,7 +31,7 @@ HintsSettings::HintsSettings(QObject *parent)
     m_hints[QPlatformTheme::StyleNames] = "panda";
     m_hints[QPlatformTheme::SystemIconFallbackThemeName] = QStringLiteral("hicolor");
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
-    m_hints[QPlatformTheme::UseFullScreenForPopupMenu] = true;
+    m_hints[QPlatformTheme::UseFullScreenForPopupMenu] = false;
 
     m_settingsFile = m_settings->fileName();
 
