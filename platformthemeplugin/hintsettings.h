@@ -13,7 +13,7 @@ class QPalette;
 class HintsSettings : public QObject
 {
     Q_OBJECT
-    
+
 public:
     explicit HintsSettings(QObject *parent = nullptr);
     ~HintsSettings() override;
@@ -28,6 +28,8 @@ public:
     QString systemFixedFont() const;
     qreal systemFontPointSize() const;
 
+    bool darkMode();
+
 public Q_SLOTS:
     void lazyInit();
 
@@ -35,6 +37,7 @@ Q_SIGNALS:
     void systemFontChanged(QString font);
     void systemFixedFontChanged(QString fixedFont);
     void systemFontPointSizeChanged(qreal systemFontPointSize);
+    void darkModeChanged(bool darkMode);
 
 private:
     void onFileChanged(const QString &path);

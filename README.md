@@ -1,4 +1,4 @@
-# Panda Qt5 Plugin
+# Panda Qt5 Plugins
 
 Unify Qt application style of pandaOS.
 
@@ -18,4 +18,4 @@ sudo make install
 
 ## License
 
-panda-qt5-plugin is licensed under GPLv3.
+panda-qt5-plugins is licensed under GPLv3.

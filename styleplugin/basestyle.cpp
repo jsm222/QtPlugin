@@ -3118,7 +3118,7 @@ void BaseStyle::drawControl(ControlElement element,
     }
 }
 
-QPalette BaseStyle::lightModePalette() const
+QPalette BaseStyle::lightModePalette()
 {
     QPalette palette;
     palette.setColor(QPalette::Active, QPalette::Window, QRgb(0xF7F7F7));
@@ -3184,7 +3184,7 @@ QPalette BaseStyle::lightModePalette() const
     return palette;
 }
 
-QPalette BaseStyle::darkModePalette() const
+QPalette BaseStyle::darkModePalette()
 {
     QPalette palette;
     palette.setColor(QPalette::Active, QPalette::Window, QRgb(0x3B3B3D));

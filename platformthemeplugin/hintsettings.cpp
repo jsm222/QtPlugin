@@ -22,6 +22,7 @@
 static const QByteArray s_systemFontName = QByteArrayLiteral("Font");
 static const QByteArray s_systemFixedFontName = QByteArrayLiteral("FixedFont");
 static const QByteArray s_systemPointFontSize = QByteArrayLiteral("FontSize");
+static const QByteArray s_darkModeName = QByteArrayLiteral("DarkMode");
 
 HintsSettings::HintsSettings(QObject *parent)
     : QObject(parent),
@@ -79,6 +80,11 @@ qreal HintsSettings::systemFontPointSize() const
     return m_settings->value(s_systemPointFontSize, 10.5).toDouble();
 }
 
+bool HintsSettings::darkMode()
+{
+    return m_settings->value(s_darkModeName, false).toBool();
+}
+
 void HintsSettings::onFileChanged(const QString &path)
 {
     QVariantMap map;
@@ -99,6 +105,8 @@ void HintsSettings::onFileChanged(const QString &path)
                 emit systemFixedFontChanged(newValue.toString());
             else if (value == s_systemPointFontSize)
                 emit systemFontPointSizeChanged(newValue.toDouble());
+            else if (value == s_darkModeName)
+                emit darkModeChanged(newValue.toBool());
         }
     }
 

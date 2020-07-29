@@ -42,19 +42,34 @@ PandaPlatformTheme::PandaPlatformTheme()
         m_x11Integration->init();
     }
 
+    // auto onFontChanged = [=] {
+    //                          QEvent event(QEvent::ApplicationFontChange);
+    //                          qApp->sendEvent(qApp, &event);
+
+    //                          for (QWindow *window : qGuiApp->allWindows()) {
+    //                              if (window->type() == Qt::Desktop)
+    //                                  continue;
+
+
+    //                              qApp->sendEvent(window, &event);
+    //                          }
+
+    //                          Q_EMIT qGuiApp->fontChanged(qGuiApp->font());
+    //                      };
+
     connect(m_hints, &HintsSettings::systemFontChanged, this, [=] {
-        QFont font = qApp->font();
+        QString fontFamily = m_hints->systemFont();
+        QFont font = QApplication::font();
+        font.setFamily(fontFamily);
+        QApplication::setFont(fontFamily);
+    });
+
+    connect(m_hints, &HintsSettings::systemFontPointSizeChanged, this, [=] {
+        QFont font = QApplication::font();
         font.setPointSizeF(m_hints->systemFontPointSize());
         font.setFamily(m_hints->systemFont());
         QApplication::setFont(font);
     });
-
-    connect(m_hints, &HintsSettings::systemFontPointSizeChanged, this, [=] {
-        QFont font = qApp->font();
-        font.setPointSizeF(m_hints->systemFontPointSize());
-        QApplication::setFont(font);
-    });
-
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
 }

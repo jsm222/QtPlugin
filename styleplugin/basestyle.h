@@ -43,8 +43,8 @@ public:
         Phantom_PE_WindowFrameColor,
     };
 
-    QPalette lightModePalette() const;
-    QPalette darkModePalette() const;
+    static QPalette lightModePalette();
+    static QPalette darkModePalette();
     QPalette standardPalette() const override;
     void drawPrimitive(PrimitiveElement elem,
                        const QStyleOption* option,
