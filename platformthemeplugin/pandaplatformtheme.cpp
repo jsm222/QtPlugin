@@ -8,12 +8,18 @@
 #include <QString>
 #include <QVariant>
 #include <QDebug>
+#include <QLibrary>
 
 // Qt DBus
 #include <QDBusConnection>
 #include <QDBusInterface>
 
 #include <KWindowSystem>
+
+// Function to create a new Fm::FileDialogHelper object.
+// This is dynamically loaded at runtime on demand from libfm-qt.
+typedef QPlatformDialogHelper* (*CreateFileDialogHelperFunc)();
+static CreateFileDialogHelperFunc createFileDialogHelper = nullptr;
 
 static const QByteArray s_x11AppMenuServiceNamePropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_SERVICE_NAME");
 static const QByteArray s_x11AppMenuObjectPathPropertyName = QByteArrayLiteral("_KDE_NET_WM_APPMENU_OBJECT_PATH");
@@ -76,6 +82,50 @@ PandaPlatformTheme::PandaPlatformTheme()
 
 PandaPlatformTheme::~PandaPlatformTheme()
 {
+}
+
+bool PandaPlatformTheme::usePlatformNativeDialog(DialogType type) const
+{
+    if (type == FileDialog
+       && qobject_cast<QApplication *>(QCoreApplication::instance())) { // QML may not have qApp
+        // use our own file dialog
+        return true;
+    }
+    return false;
+}
+
+QPlatformDialogHelper *PandaPlatformTheme::createPlatformDialogHelper(DialogType type) const
+{
+    if (type == FileDialog
+       && qobject_cast<QApplication *>(QCoreApplication::instance())) { // QML may not have qApp
+        // use our own file dialog provided by libfm
+
+        // When a process has this environment set, that means glib event loop integration is disabled.
+        // In this case, libfm-qt just won't work. So let's disable the file dialog helper and return nullptr.
+        if (QString::fromLocal8Bit(qgetenv("QT_NO_GLIB")) == QLatin1String("1")) {
+            return nullptr;
+        }
+
+        // The createFileDialogHelper() method is dynamically loaded from libfm-qt on demand
+        if (createFileDialogHelper == nullptr) {
+            // try to dynamically load versioned libfm-qt.so
+            QLibrary fmLibrary{QLatin1String(LIB_FM_QT_SONAME)};
+            fmLibrary.load();
+            if (!fmLibrary.isLoaded()) {
+                return nullptr;
+            }
+
+            // try to resolve the symbol to get the function pointer
+            createFileDialogHelper = reinterpret_cast<CreateFileDialogHelperFunc>(fmLibrary.resolve("createFileDialogHelper"));
+            if (!createFileDialogHelper) {
+                return nullptr;
+            }
+        }
+
+        // create a new file dialog helper provided by libfm
+        return createFileDialogHelper();
+    }
+    return nullptr;
 }
 
 QVariant PandaPlatformTheme::themeHint(QPlatformTheme::ThemeHint hintType) const

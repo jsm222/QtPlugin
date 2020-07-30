@@ -20,11 +20,14 @@ public:
     PandaPlatformTheme();
     ~PandaPlatformTheme() override;
 
+    bool usePlatformNativeDialog(DialogType type) const override;
+    QPlatformDialogHelper *createPlatformDialogHelper(DialogType type) const override;
+
     QVariant themeHint(ThemeHint hint) const override;
     const QFont *font(Font type) const override;
 
     QPlatformMenuBar *createPlatformMenuBar() const override;
-    
+
     QPlatformSystemTrayIcon *createPlatformSystemTrayIcon() const override {
         auto trayIcon = new SystemTrayIcon;
         if (trayIcon->isSystemTrayAvailable())
