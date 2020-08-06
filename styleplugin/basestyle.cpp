@@ -56,6 +56,8 @@
 #include <QtMath>
 #include <qdrawutil.h>
 
+#include <QSettings>
+
 #include <cmath>
 
 QT_BEGIN_NAMESPACE
@@ -3228,9 +3230,9 @@ QPalette BaseStyle::darkModePalette()
     palette.setColor(QPalette::Inactive, QPalette::ButtonText, QRgb(0x9E9FA5));
     palette.setColor(QPalette::Disabled, QPalette::ButtonText, QRgb(0x73747E));
 
-    palette.setColor(QPalette::Active, QPalette::Highlight, QRgb(0x2D532D));
-    palette.setColor(QPalette::Inactive, QPalette::Highlight, QRgb(0x354637));
-    palette.setColor(QPalette::Disabled, QPalette::Highlight, QRgb(0x293D29));
+    palette.setColor(QPalette::Active, QPalette::Highlight, QRgb(0x447FCF));
+    palette.setColor(QPalette::Inactive, QPalette::Highlight, QRgb(0x3B6EB3));
+    palette.setColor(QPalette::Disabled, QPalette::Highlight, QRgb(0x315B94));
 
     palette.setColor(QPalette::Active, QPalette::HighlightedText, QRgb(0xCCCCCC));
     palette.setColor(QPalette::Inactive, QPalette::HighlightedText, QRgb(0xCECECE));
@@ -3252,7 +3254,7 @@ QPalette BaseStyle::darkModePalette()
 
 QPalette BaseStyle::standardPalette() const
 {
-    return lightModePalette();
+    return isDarkMode() ? darkModePalette() : lightModePalette();
 
     // QColor backGround(251, 251, 251);
     // QColor light = backGround.lighter(150);
@@ -4519,6 +4521,12 @@ void BaseStyle::unpolish(QWidget *widget)
     }
 
     m_shadowHelper->unregisterWidget(widget);
+}
+
+bool BaseStyle::isDarkMode() const
+{
+    QSettings settings(QSettings::UserScope, "panda", "theme");
+    return settings.value("DarkMode", false).toBool();
 }
 
 QRect BaseStyle::subControlRect(ComplexControl control,
