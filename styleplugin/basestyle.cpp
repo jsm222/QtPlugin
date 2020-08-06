@@ -3162,8 +3162,8 @@ QPalette BaseStyle::lightModePalette()
     palette.setColor(QPalette::Inactive, QPalette::AlternateBase, QRgb(0xF1F6EE));
     palette.setColor(QPalette::Disabled, QPalette::AlternateBase, QRgb(0xE1E9DD));
 
-    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x549CFF));
-    palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0xF9F9F9));
+    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0xF7F7F7));
+    palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0x1D1D20));
 
     palette.setColor(QPalette::Active, QPalette::Button, QRgb(0xD4D5DD));
     palette.setColor(QPalette::Inactive, QPalette::Button, QRgb(0xDCDCE0));
@@ -3228,8 +3228,8 @@ QPalette BaseStyle::darkModePalette()
     palette.setColor(QPalette::Inactive, QPalette::AlternateBase, QRgb(0x2B2B2F));
     palette.setColor(QPalette::Disabled, QPalette::AlternateBase, QRgb(0x36363A));
 
-    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x2D532D));
-    palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0xBFBFBF));
+    palette.setColor(QPalette::All, QPalette::ToolTipBase, QRgb(0x3B3B3D));
+    palette.setColor(QPalette::All, QPalette::ToolTipText, QRgb(0xCACBCE));
 
     palette.setColor(QPalette::Active, QPalette::Button, QRgb(0x28282B));
     palette.setColor(QPalette::Inactive, QPalette::Button, QRgb(0x28282B));
