@@ -1835,8 +1835,15 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         // over the perimeter, because an inset with rounding enabled may cause
         // some miscolored separated pixels between the fill and the border, since
         // we're forced to paint them in two separate draw calls.
-        painter->setOpacity(0.5);
-        Ph::paintSolidRoundRect(painter, option->rect, Ph::LineEdit_Rounding, swatch, S_base);
+
+        painter->setRenderHint(QPainter::Antialiasing);
+        painter->setPen(swatch.pen(Ph::SwatchColors::S_none));
+        QColor bgColor = swatch.color(S_base);
+        bgColor.setAlpha(100);
+        painter->setBrush(bgColor);
+        painter->drawRoundedRect(option->rect, Ph::LineEdit_Rounding, Ph::LineEdit_Rounding);
+
+        // Ph::paintSolidRoundRect(painter, option->rect, Ph::LineEdit_Rounding, swatch, S_base);
         save.restore();
         if (panel->lineWidth > 0)
             proxy()->drawPrimitive(PE_FrameLineEdit, option, painter, widget);
