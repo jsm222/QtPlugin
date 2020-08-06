@@ -44,13 +44,14 @@ public:
     void unregisterWidget(QWidget *);
     bool eventFilter(QObject *, QEvent *) override;
 
+    void update(QWidget *) const;
+
 protected:
     void addEventFilter(QObject *object) {
         object->removeEventFilter(this);
         object->installEventFilter(this);
     }
 
-    void update(QWidget *) const;
 };
 
 #endif // BLURHELPER_H

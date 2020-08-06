@@ -2164,17 +2164,18 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         painter->setRenderHint(QPainter::Antialiasing);
         painter->setPen(swatch.color(S_frame_outline));
         QColor background(swatch.color(S_window));
-        // background.setAlpha(100);
+        background.setAlpha(150);
         painter->setBrush(background);
         QRectF frameRect = strokedRect(option->rect, 1);
         painter->drawRoundedRect(frameRect, radius, radius);
 
-//        if (widget && widget->window()) {
-//            QPainterPath path;
-//            path.addRoundedRect(option->rect, radius, radius);
-//            const_cast<QWidget *>(widget)->setMask(path.toFillPolygon().toPolygon());
-//            m_blurHelper->registerWidget(widget->window());
-//        }
+        // blur
+        if (widget && widget->window()) {
+            QPainterPath path;
+            path.addRoundedRect(option->rect, radius, radius);
+            const_cast<QWidget *>(widget)->setMask(path.toFillPolygon().toPolygon());
+            m_blurHelper->update(const_cast<QWidget *>(widget));
+        }
 
         painter->restore();
         break;
@@ -4494,6 +4495,7 @@ void BaseStyle::polish(QWidget *widget)
 
     if (qobject_cast<QMenu *>(widget)) {
         widget->setAttribute(Qt::WA_TranslucentBackground, true);
+        m_blurHelper->registerWidget(widget);
     }
 
     if (widget->inherits("QTipLabel") || widget->inherits("QComboBoxPrivateContainer")) {
@@ -4522,6 +4524,7 @@ void BaseStyle::unpolish(QWidget *widget)
 
     if (qobject_cast<QMenu *>(widget)) {
         widget->setAttribute(Qt::WA_TranslucentBackground, false);
+        m_blurHelper->unregisterWidget(widget);
     }
 
     if (widget->inherits("QTipLabel")) {
