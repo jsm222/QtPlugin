@@ -4,7 +4,7 @@ Unify Qt application style of pandaOS.
 
 ## Dependencies
 
-`sudo pacman -S gcc extra-cmake-modules qt5-base qt5-tools qt5-x11extras libdbusmenu-qt5 libxcb`
+`sudo pacman -S gcc extra-cmake-modules qt5-base qt5-tools qt5-x11extras libqtxdg libdbusmenu-qt5 libxcb`
 
 ## Build
 
