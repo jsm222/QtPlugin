@@ -63,6 +63,10 @@ PandaPlatformTheme::PandaPlatformTheme()
     //                          Q_EMIT qGuiApp->fontChanged(qGuiApp->font());
     //                      };
 
+    connect(m_hints, &HintsSettings::darkModeChanged, this, [=] {
+        QApplication::setStyle("panda");
+    });
+
     connect(m_hints, &HintsSettings::systemFontChanged, this, [=] {
         QString fontFamily = m_hints->systemFont();
         QFont font = QApplication::font();
