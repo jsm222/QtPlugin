@@ -9,9 +9,13 @@
 #include <QVariant>
 #include <QDebug>
 #include <QLibrary>
+#include <QStyleFactory>
 
+// Qt Private
 #include <private/qicon_p.h>
 #include <private/qiconloader_p.h>
+#include <private/qwindow_p.h>
+#include <private/qguiapplication_p.h>
 
 // Qt DBus
 #include <QDBusConnection>
@@ -20,7 +24,7 @@
 #include <KWindowSystem>
 
 // Function to create a new Fm::FileDialogHelper object.
-// This is dynamically loaded at runtime on demand from libfm-qt.
+// This is dynamically loaded at runtime on demand from pandafm.
 typedef QPlatformDialogHelper* (*CreateFileDialogHelperFunc)();
 static CreateFileDialogHelperFunc createFileDialogHelper = nullptr;
 
@@ -40,11 +44,38 @@ static bool isDBusGlobalMenuAvailable()
     return dbusGlobalMenuAvailable;
 }
 
+static void onFontChanged()
+{
+    if (QGuiApplicationPrivate::app_font)
+        delete QGuiApplicationPrivate::app_font;
+
+    QGuiApplicationPrivate::app_font = nullptr;
+    QEvent event(QEvent::ApplicationFontChange);
+    qApp->sendEvent(qApp, &event);
+
+    for (QWindow *window : qGuiApp->allWindows()) {
+        if (window->type() == Qt::Desktop)
+            continue;
+
+        qApp->sendEvent(window, &event);
+    }
+
+    Q_EMIT qGuiApp->fontChanged(qGuiApp->font());
+}
+
 extern void updateXdgIconSystemTheme();
 static void onIconThemeChanged()
 {
     QIconLoader::instance()->updateSystemTheme();
     updateXdgIconSystemTheme();
+
+    QEvent update(QEvent::UpdateRequest);
+    for (QWindow *window : qGuiApp->allWindows()) {
+        if (window->type() == Qt::Desktop)
+            continue;
+
+        qApp->sendEvent(window, &update);
+    }
 }
 
 PandaPlatformTheme::PandaPlatformTheme()
@@ -58,39 +89,14 @@ PandaPlatformTheme::PandaPlatformTheme()
         m_x11Integration->init();
     }
 
-    // auto onFontChanged = [=] {
-    //                          QEvent event(QEvent::ApplicationFontChange);
-    //                          qApp->sendEvent(qApp, &event);
-
-    //                          for (QWindow *window : qGuiApp->allWindows()) {
-    //                              if (window->type() == Qt::Desktop)
-    //                                  continue;
-
-
-    //                              qApp->sendEvent(window, &event);
-    //                          }
-
-    //                          Q_EMIT qGuiApp->fontChanged(qGuiApp->font());
-    //                      };
-
     connect(m_hints, &HintsSettings::darkModeChanged, this, [=] {
-        QApplication::setStyle("panda");
+        QStyle *style = QStyleFactory::create("panda");
+        if (style)
+            qApp->setStyle(style);
     });
 
-    connect(m_hints, &HintsSettings::systemFontChanged, this, [=] {
-        QString fontFamily = m_hints->systemFont();
-        QFont font = QApplication::font();
-        font.setFamily(fontFamily);
-        QApplication::setFont(fontFamily);
-    });
-
-    connect(m_hints, &HintsSettings::systemFontPointSizeChanged, this, [=] {
-        QFont font = QApplication::font();
-        font.setPointSizeF(m_hints->systemFontPointSize());
-        font.setFamily(m_hints->systemFont());
-        QApplication::setFont(font);
-    });
-
+    connect(m_hints, &HintsSettings::systemFontChanged, &onFontChanged);
+    connect(m_hints, &HintsSettings::systemFontPointSizeChanged, &onFontChanged);
     connect(m_hints, &HintsSettings::iconThemeChanged, &onIconThemeChanged);
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
