@@ -1,6 +1,15 @@
 #include <qpa/qplatformthemeplugin.h>
 #include "pandaplatformtheme.h"
 
+#include <private/xdgiconloader/xdgiconloader_p.h>
+
+QT_BEGIN_NAMESPACE
+
+void updateXdgIconSystemTheme()
+{
+    XdgIconLoader::instance()->updateSystemTheme();
+}
+
 class PlatformThemePlugin : public QPlatformThemePlugin
 {
     Q_OBJECT
@@ -17,5 +26,7 @@ public:
         return new PandaPlatformTheme;
     }
 };
+
+QT_END_NAMESPACE
 
 #include "main.moc"

@@ -77,6 +77,8 @@ target_link_libraries(panda-qtplugin PRIVATE
     Qt5::DBus
     dbusmenu-qt5
 
+    Qt5XdgIconLoader
+
     KF5::WindowSystem
     ${XCB_LIBRARIES}
     ${QT5PLATFORMSUPPORT_LIBS}

@@ -105,8 +105,12 @@ void HintsSettings::onFileChanged(const QString &path)
                 emit systemFixedFontChanged(newValue.toString());
             else if (value == s_systemPointFontSize)
                 emit systemFontPointSizeChanged(newValue.toDouble());
-            else if (value == s_darkModeName)
+            else if (value == s_darkModeName) {
                 emit darkModeChanged(newValue.toBool());
+                // Need to update the icon to dark
+                m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? "Lucia-dark" : "Lucia";
+                emit iconThemeChanged();
+            }
         }
     }
 

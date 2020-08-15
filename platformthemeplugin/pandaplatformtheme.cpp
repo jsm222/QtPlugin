@@ -10,6 +10,9 @@
 #include <QDebug>
 #include <QLibrary>
 
+#include <private/qicon_p.h>
+#include <private/qiconloader_p.h>
+
 // Qt DBus
 #include <QDBusConnection>
 #include <QDBusInterface>
@@ -35,6 +38,13 @@ static bool isDBusGlobalMenuAvailable()
 {
     static bool dbusGlobalMenuAvailable = checkDBusGlobalMenuAvailable();
     return dbusGlobalMenuAvailable;
+}
+
+extern void updateXdgIconSystemTheme();
+static void onIconThemeChanged()
+{
+    QIconLoader::instance()->updateSystemTheme();
+    updateXdgIconSystemTheme();
 }
 
 PandaPlatformTheme::PandaPlatformTheme()
@@ -80,6 +90,8 @@ PandaPlatformTheme::PandaPlatformTheme()
         font.setFamily(m_hints->systemFont());
         QApplication::setFont(font);
     });
+
+    connect(m_hints, &HintsSettings::iconThemeChanged, &onIconThemeChanged);
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
 }

@@ -37,6 +37,7 @@ Q_SIGNALS:
     void systemFontChanged(QString font);
     void systemFixedFontChanged(QString fixedFont);
     void systemFontPointSizeChanged(qreal systemFontPointSize);
+    void iconThemeChanged();
     void darkModeChanged(bool darkMode);
 
 private:
