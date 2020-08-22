@@ -23,12 +23,14 @@ static const QByteArray s_systemFontName = QByteArrayLiteral("Font");
 static const QByteArray s_systemFixedFontName = QByteArrayLiteral("FixedFont");
 static const QByteArray s_systemPointFontSize = QByteArrayLiteral("FontSize");
 static const QByteArray s_darkModeName = QByteArrayLiteral("DarkMode");
+static const QByteArray s_lightIconName = QByteArrayLiteral("Lucia");
+static const QByteArray s_darkIconName = QByteArrayLiteral("Lucia-dark");
 
 HintsSettings::HintsSettings(QObject *parent)
     : QObject(parent),
       m_settings(new QSettings(QSettings::UserScope, "panda", "theme"))
 {
-    m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? "Lucia-dark" : "Lucia";
+    m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? s_darkIconName : s_lightIconName;
     m_hints[QPlatformTheme::StyleNames] = "panda";
     m_hints[QPlatformTheme::SystemIconFallbackThemeName] = QStringLiteral("hicolor");
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
@@ -108,7 +110,7 @@ void HintsSettings::onFileChanged(const QString &path)
             else if (value == s_darkModeName) {
                 emit darkModeChanged(newValue.toBool());
                 // Need to update the icon to dark
-                m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? "Lucia-dark" : "Lucia";
+                m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? s_darkIconName : s_lightIconName;
                 emit iconThemeChanged();
             }
         }

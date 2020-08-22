@@ -78,26 +78,28 @@ static void onIconThemeChanged()
     }
 }
 
-PandaPlatformTheme::PandaPlatformTheme()
+void onDarkModeChanged()
 {
-    m_hints = new HintsSettings();
+    QStyle *style = QStyleFactory::create("panda");
+    if (style) {
+        qApp->setStyle(style);
+    }
+}
 
-    qApp->setProperty("_hints_settings_object", (quintptr)m_hints);
+PandaPlatformTheme::PandaPlatformTheme()
+    : m_hints(new HintsSettings)
+{
+    // qApp->setProperty("_hints_settings_object", (quintptr)m_hints);
 
     if (KWindowSystem::isPlatformX11()) {
         m_x11Integration.reset(new X11Integration());
         m_x11Integration->init();
     }
 
-    connect(m_hints, &HintsSettings::darkModeChanged, this, [=] {
-        QStyle *style = QStyleFactory::create("panda");
-        if (style)
-            qApp->setStyle(style);
-    });
-
     connect(m_hints, &HintsSettings::systemFontChanged, &onFontChanged);
     connect(m_hints, &HintsSettings::systemFontPointSizeChanged, &onFontChanged);
     connect(m_hints, &HintsSettings::iconThemeChanged, &onIconThemeChanged);
+    connect(m_hints, &HintsSettings::darkModeChanged, &onDarkModeChanged);
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
 }
