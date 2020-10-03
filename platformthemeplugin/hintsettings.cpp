@@ -23,8 +23,8 @@ static const QByteArray s_systemFontName = QByteArrayLiteral("Font");
 static const QByteArray s_systemFixedFontName = QByteArrayLiteral("FixedFont");
 static const QByteArray s_systemPointFontSize = QByteArrayLiteral("FontSize");
 static const QByteArray s_darkModeName = QByteArrayLiteral("DarkMode");
-static const QByteArray s_lightIconName = QByteArrayLiteral("Lucia");
-static const QByteArray s_darkIconName = QByteArrayLiteral("Lucia-dark");
+static const QByteArray s_lightIconName = QByteArrayLiteral("elementary-xfce");
+static const QByteArray s_darkIconName = QByteArrayLiteral("elementary-xfce-dark");
 
 HintsSettings::HintsSettings(QObject *parent)
     : QObject(parent),
@@ -69,7 +69,7 @@ QStringList HintsSettings::xdgIconThemePaths() const
 
 QString HintsSettings::systemFont() const
 {
-    return m_settings->value(s_systemFontName, "Noto Sans").toString();
+    return m_settings->value(s_systemFontName, "Nimbus Sans").toString();
 }
 
 QString HintsSettings::systemFixedFont() const

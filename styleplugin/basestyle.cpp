@@ -115,12 +115,13 @@ namespace Phantom
         constexpr qint16 HeaderSortIndicator_VOffset = 2;
         constexpr qint16 TabBar_InctiveVShift = 0;
 
-        constexpr qreal DefaultFrame_Radius = 5.0;
+	// Radii
+        constexpr qreal DefaultFrame_Radius = 0.0;
         constexpr qreal TabBarTab_Rounding = 1.0;
         constexpr qreal SpinBox_Rounding = 5.0;
         constexpr qreal LineEdit_Rounding = 5.0;
         constexpr qreal FrameFocusRect_Rounding = 5.0;
-        constexpr qreal PushButton_Rounding = 5.0;
+        constexpr qreal PushButton_Rounding = 15.0;
         constexpr qreal ToolButton_Rounding = 5.0;
         constexpr qreal ProgressBar_Rounding = 5.0;
         constexpr qreal GroupBox_Rounding = 5.0;
@@ -4494,12 +4495,12 @@ void BaseStyle::polish(QWidget *widget)
     }
 
     if (qobject_cast<QMenu *>(widget)) {
-        widget->setAttribute(Qt::WA_TranslucentBackground, true);
+        widget->setAttribute(Qt::WA_TranslucentBackground, false); // was: true
         m_blurHelper->registerWidget(widget);
     }
 
     if (widget->inherits("QTipLabel") || widget->inherits("QComboBoxPrivateContainer")) {
-        widget->setAttribute(Qt::WA_TranslucentBackground, true);
+        widget->setAttribute(Qt::WA_TranslucentBackground, false); // was: true
     }
 
     m_shadowHelper->registerWidget(widget);
@@ -4900,9 +4901,9 @@ int BaseStyle::styleHint(StyleHint hint,
                          const QWidget* widget,
                          QStyleHintReturn* returnData) const
 {
-    if (auto menu = qobject_cast<const QMenu *>(widget)) {
-        const_cast<QWidget *>(widget)->setAttribute(Qt::WA_TranslucentBackground);
-    }
+//    if (auto menu = qobject_cast<const QMenu *>(widget)) {
+//        const_cast<QWidget *>(widget)->setAttribute(Qt::WA_TranslucentBackground);
+//    }
 
     switch (hint) {
     case SH_Slider_SnapToValue:

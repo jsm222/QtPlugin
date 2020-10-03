@@ -13,7 +13,6 @@ find_package(Qt5Gui CONFIG REQUIRED Private)
 find_package(Qt5XdgIconLoader REQUIRED)
 find_package(dbusmenu-qt5 REQUIRED)
 find_package(KF5WindowSystem REQUIRED)
-find_package(libpanda-files REQUIRED)
 
 # dependencies for QPA plugin
 find_package(Qt5ThemeSupport REQUIRED)
@@ -50,23 +49,11 @@ qt5_add_dbus_adaptor(SRCS
     StatusNotifierItem
 )
 
-get_target_property(LIB_FM_QT_CONFIGURATIONS libpanda-files IMPORTED_CONFIGURATIONS)
-if (LIB_FM_QT_CONFIGURATIONS)
-    # Extract the .soname from the first configuration found.
-    # We don't use configuration mapping. Any config serves the purpose
-    list(GET LIB_FM_QT_CONFIGURATIONS 0 LIB_FM_QT_FIRST_CONFIGURATION)
-    get_target_property(LIB_FM_QT_SONAME libpanda-files IMPORTED_SONAME_${LIB_FM_QT_FIRST_CONFIGURATION})
-else()
-    message(ERROR "libpanda-files, but no configuration found. Check your libpanda-files installation.")
-endif()
-mark_as_advanced(LIB_FM_QT_SONAME)
-
 add_library(panda-qtplugin MODULE ${SRCS})
 
 target_compile_definitions(panda-qtplugin
     PRIVATE
         "QT_NO_FOREACH"
-        "LIB_FM_QT_SONAME=\"${LIB_FM_QT_SONAME}\""
 )
 
 target_link_libraries(panda-qtplugin PRIVATE
