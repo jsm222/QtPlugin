@@ -36,6 +36,19 @@ HintsSettings::HintsSettings(QObject *parent)
     m_hints[QPlatformTheme::IconThemeSearchPaths] = xdgIconThemePaths();
     m_hints[QPlatformTheme::UseFullScreenForPopupMenu] = false;
 
+    // probono: Default button on the right-hand side, no icons in buttons
+    m_hints[QPlatformTheme::DialogButtonBoxLayout] = QDialogButtonBox::MacLayout;
+    m_hints[QPlatformTheme::DialogButtonBoxButtonsHaveIcons] = false;
+
+    // probono: Mac-like shortcuts
+    m_hints[QPlatformTheme::KeyboardScheme] = QPlatformTheme::MacKeyboardScheme;
+
+    // NOTE: Should it be neccessary to swap CTRL and ALT, then see
+    // https://code.qt.io/cgit/qt/qtbase.git/tree/src/gui/kernel/qplatformtheme.cpp?h=5.13&id=7db9e02ad11c391c1d616defd11e7deb2718d60a#n610
+
+    // probono: Display shortcut key sequences in context menus
+    m_hints[QPlatformTheme::ShowShortcutsInContextMenus] = true;
+
     m_settingsFile = m_settings->fileName();
 
     QMetaObject::invokeMethod(this, "lazyInit", Qt::QueuedConnection);
@@ -79,7 +92,7 @@ QString HintsSettings::systemFixedFont() const
 
 qreal HintsSettings::systemFontPointSize() const
 {
-    return m_settings->value(s_systemPointFontSize, 10.5).toDouble();
+    return m_settings->value(s_systemPointFontSize, 11).toDouble(); // was 10.5
 }
 
 bool HintsSettings::darkMode()
