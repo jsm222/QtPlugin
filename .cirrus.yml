@@ -14,5 +14,5 @@ task:
     - make DESTDIR=Plugin -j$(sysctl -n hw.ncpu) install
     - find Plugin/
     - zip --symlinks -r Plugin_FreeBSD.zip Plugin/
-    - curl --upload-file ./Plugin.zip https://transfer.sh/Plugin.zip
+    - curl --upload-file ./Plugin_FreeBSD.zip https://transfer.sh/Plugin_FreeBSD.zip
   only_if: $CIRRUS_BRANCH == 'master'
