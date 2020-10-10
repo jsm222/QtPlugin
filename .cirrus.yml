@@ -1,0 +1,18 @@
+freebsd_instance:
+  image: freebsd-12-1-release-amd64
+
+task:
+  # This name gets reported as a build status in GitHub
+  name: freebsd-12-1-release-amd64
+  stateful: false
+  setup_script:
+    - pkg install -y curl zip cmake pkgconf libfm qt5-core qt5-x11extras qt5-widgets qt5-qmake qt5-buildtools qt5-linguisttools kf5-extra-cmake-modules libqtxdg libxcb libdbusmenu-qt5
+  test_script:
+    - mkdir build ; cd build
+    - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
+    - make -j$(sysctl -n hw.ncpu)
+    - make DESTDIR=Plugin -j$(sysctl -n hw.ncpu) install
+    - find Plugin/
+    - zip --symlinks -r Plugin_FreeBSD.zip Plugin/
+    - curl --upload-file ./Plugin.zip https://transfer.sh/Plugin.zip
+  only_if: $CIRRUS_BRANCH == 'master'
