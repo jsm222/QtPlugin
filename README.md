@@ -1,10 +1,20 @@
 # Panda Qt5 Plugins
 
-Unify Qt application style of pandaOS.
+Qt platform plugin and style. Exports windows to KDE-style global menus via D-Bus.
 
 ## Dependencies
 
-`sudo pacman -S gcc extra-cmake-modules qt5-base qt5-tools qt5-x11extras libqtxdg libdbusmenu-qt5 libxcb`
+On Arch Linux:
+
+```
+sudo pacman -S gcc extra-cmake-modules qt5-base qt5-tools qt5-x11extras libqtxdg libdbusmenu-qt5 libxcb
+```
+
+On FreeBSD:
+
+```
+sudo pkg install -y curl zip cmake pkgconf libfm qt5-core qt5-x11extras qt5-widgets qt5-qmake qt5-buildtools qt5-linguisttools kf5-extra-cmake-modules libqtxdg libxcb libdbusmenu-qt5 kf5-kwindowsystem
+```
 
 ## Build
 
