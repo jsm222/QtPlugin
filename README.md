@@ -1,4 +1,4 @@
-# Panda Qt5 Plugins
+# Panda Qt5 Plugins [![Build Status](https://api.cirrus-ci.com/github/probonopd/panda-qt5-plugin.svg)](https://cirrus-ci.com/github/probonopd/panda-qt5-plugin)
 
 Qt platform plugin and style. Exports windows to KDE-style global menus via D-Bus.
 
