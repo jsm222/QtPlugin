@@ -11,8 +11,8 @@ task:
     - mkdir build ; cd build
     - cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr
     - make -j$(sysctl -n hw.ncpu)
-    - make DESTDIR=Plugin -j$(sysctl -n hw.ncpu) install
-    - find Plugin/
-    - zip --symlinks -r Plugin_FreeBSD.zip Plugin/
-    - curl --upload-file ./Plugin_FreeBSD.zip https://transfer.sh/Plugin_FreeBSD.zip
+    - make DESTDIR=QtPlugin -j$(sysctl -n hw.ncpu) install
+    - find QtPlugin/
+    - zip --symlinks -r QtPlugin_FreeBSD.zip QtPlugin/
+    - curl --upload-file ./QtPlugin_FreeBSD.zip https://transfer.sh/QtPlugin_FreeBSD.zip
   only_if: $CIRRUS_BRANCH == 'master'
