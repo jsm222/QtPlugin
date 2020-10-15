@@ -123,7 +123,7 @@ namespace Phantom
         constexpr qreal FrameFocusRect_Rounding = 5.0;
         constexpr qreal PushButton_Rounding = 15.0;
         constexpr qreal ToolButton_Rounding = 5.0;
-        constexpr qreal ProgressBar_Rounding = 5.0;
+        constexpr qreal ProgressBar_Rounding = 0.0;
         constexpr qreal GroupBox_Rounding = 5.0;
         constexpr qreal SliderGroove_Rounding = 5.0;
         constexpr qreal SliderHandle_Rounding = 5.0;
@@ -141,6 +141,7 @@ namespace Phantom
         constexpr qreal MenuItem_LeftMarginFontRatio = 1.0 / 2.0;
         constexpr qreal MenuItem_RightMarginForTextFontRatio = 1.0 / 1.5;
         constexpr qreal MenuItem_RightMarginForArrowFontRatio = 1.0 / 4.0;
+        // Set the height of menu items
         constexpr qreal MenuItem_VerticalMarginsFontRatio = 1.0 / 5.0;
         // Number that's multiplied with a font's height to get the space between a
         // menu item's checkbox (or other sign) and its text (or icon).
