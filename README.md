@@ -26,6 +26,13 @@ make
 sudo make install
 ```
 
+## Usage
+
+```
+export QT_QPA_PLATFORMTHEME=panda
+(start Qt applciation)
+```
+
 ## License
 
 panda-qt5-plugins is licensed under GPLv3.
