@@ -60,6 +60,8 @@
 
 #include <cmath>
 
+#include <QStandardPaths>
+
 QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
 QT_END_NAMESPACE
@@ -4461,6 +4463,19 @@ void BaseStyle::polish(QApplication* app)
 
     app->setPalette(standardPalette());
 
+    // probono: Use ~/.config/stylesheet.qss or /etc/xdg/tylesheet.qss if exists
+    QString qsspath;
+    qsspath = QStandardPaths::locate(QStandardPaths::ConfigLocation, QStringLiteral("stylesheet.qss"), QStandardPaths::LocateFile);
+    if(qsspath.isEmpty() == false) {
+        // QMessageBox *msgBox = new QMessageBox(QMessageBox::NoIcon, "Title", qsspath);
+        // msgBox->exec();
+        QFile File(qsspath);
+        File.open(QFile::ReadOnly);
+        QString StyleSheet = QLatin1String(File.readAll());
+        app->setStyleSheet(StyleSheet);
+    }
+
+    // app->setStyleSheet("QWidget { background-color: yellow; } QPushButton { background-color: blue; }"); // probono
     // if (QObject *obj = hintsSettings()) {
     //     connect(obj, SIGNAL(systemFontChanged(QString)), this, SLOT(updateAppFont()));
     //     connect(obj, SIGNAL(systemFontPointSizeChanged(qreal)), this, SLOT(updateAppFont()));
