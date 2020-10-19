@@ -1,19 +1,21 @@
 /* https://doc.qt.io/qt-5/stylesheet-customizing.html */
+/* https://doc.qt.io/qt-5/stylesheet-examples.html */
 
 QPushButton, QProgressBar {
   height: 20px;
-  padding-top: 4px; /* Move text down a bit */
+  padding-top: 4px; /* Move text down a bit. TODO: Do this only to text in buttons, but not to icons in buttons */
   background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #ddd, stop: 0.39 #eee, stop: 0.4 #ccc, stop: 1 #fff);
 }
 
-/* Make default buttons blue. Works */
-QPushButton[default="true"] {
+/* FIXME: We end up with a black background for the QProgressBar and the text is no longer centered. Why? Probably because if we start customizing some aspects of a complex widget like QProgressBar, we need to customize ALL of them */
+
+/* Make default QPushButtons blue. Works */
+QPushButton[default="true"], QProgressBar::chunk {
   color: white;
-  background-color: #00e;
-  background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #11c, stop: 0.39 #77d, stop: 0.4 #11c, stop: 1 #88d);
+  background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #9595d3, stop: 0.1 #b9cbf9, stop: 0.39 #69ace3, stop: 0.4 #4c95d9, stop: 1 #8dd2fb);
 }
 
-/* Make buttons bright blue when hovered over. Works */
+/* Make QPushButtons yellowish glowing when hovered over. Works */
 /* Note that the order matters, so if we want default buttons to have the hover effect we need to do the hover effect after the default button stuff */
 QPushButton:hover {
   /* color: red; */
@@ -26,14 +28,38 @@ QPushButton {
   height: 20px;
   padding-left: 20px;
   padding-right: 20px;
-  border-radius: 13px; /* if we make this too large, then we get no rounded corners at all... why? */
+  border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
   border-color: grey;
 }
 
-/* FIXME: Seems not to work yet. I want more space between the Cancel, OK,... buttons in dialog boxes and the text above them */
+/* FIXME: Seems not to work yet. We want more space between the Cancel, OK,... buttons in dialog boxes and the text above them */
 QDialogButtonBox {
   margin-top: 30px;
   padding-top: 30px;
+}
+
+/* Works: Set selected items (e.g., selected text, selected list view items,...) to white text with intensive blue background */
+QWidget {
+    show-decoration-selected: 1;
+    selection-color: white;
+    selection-background-color: #336fc9; /* Intensive blue */
+    alternate-background-color: #eef1f5;
+}
+
+/* Menubar, menus, and menu items */
+/* https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qmenubar */
+
+QMenu::item:pressed, QMenuBar::item:pressed, QMenu::item:selected, QMenuBar::item:selected {
+	color: white;
+    background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); /* Intensive blue */
+}
+
+QMenuBar, QMenuBar::item {
+	background: transparent;
+}
+
+QMenu, QMenu::item {
+	background: #eee;
 }
