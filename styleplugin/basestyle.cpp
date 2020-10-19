@@ -4463,6 +4463,14 @@ void BaseStyle::polish(QApplication* app)
 
     app->setPalette(standardPalette());
 
+    // probono: For unkown reasons, 'filer-qt --desktop' crashes
+    // when we apply a stylesheet.
+    // FIXME: This is a very crude workaround, we need to find and fix the underlying issue!
+    if (app->arguments().contains("--desktop")) {
+       qDebug("probono: FIXME: Crude workaround: Do not apply stylesheet to application invoked with --desktop");
+       return;
+    }
+
     // probono: Use ~/.config/stylesheet.qss or /etc/xdg/tylesheet.qss if exists
     QString qsspath;
     qsspath = QStandardPaths::locate(QStandardPaths::ConfigLocation, QStringLiteral("stylesheet.qss"), QStandardPaths::LocateFile);
