@@ -7,13 +7,15 @@ QPushButton, QProgressBar {
   background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #ddd, stop: 0.39 #eee, stop: 0.4 #ccc, stop: 1 #fff);
 }
 
-/* Make default buttons blue. Works */
+/* FIXME: We end up with a black background for the QProgressBar and the text is no longer centered. Why? Probably because if we start customizing some aspects of a complex widget like QProgressBar, we need to customize ALL of them */
+
+/* Make default QPushButtons blue. Works */
 QPushButton[default="true"], QProgressBar::chunk {
   color: white;
   background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #9595d3, stop: 0.1 #b9cbf9, stop: 0.39 #69ace3, stop: 0.4 #4c95d9, stop: 1 #8dd2fb);
 }
 
-/* Make buttons yellowish glowing when hovered over. Works */
+/* Make QPushButtons yellowish glowing when hovered over. Works */
 /* Note that the order matters, so if we want default buttons to have the hover effect we need to do the hover effect after the default button stuff */
 QPushButton:hover {
   /* color: red; */
@@ -26,13 +28,13 @@ QPushButton {
   height: 20px;
   padding-left: 20px;
   padding-right: 20px;
-  border-radius: 13px; /* if we make this too large, then we get no rounded corners at all... why? */
+  border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
   border-color: grey;
 }
 
-/* FIXME: Seems not to work yet. I want more space between the Cancel, OK,... buttons in dialog boxes and the text above them */
+/* FIXME: Seems not to work yet. We want more space between the Cancel, OK,... buttons in dialog boxes and the text above them */
 QDialogButtonBox {
   margin-top: 30px;
   padding-top: 30px;
