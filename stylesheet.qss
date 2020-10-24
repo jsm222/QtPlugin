@@ -26,6 +26,7 @@ QPushButton:hover {
 /* Seems to work but if we start customizing some aspects, we need to customize ALL of them */
 QPushButton {
   height: 20px;
+  padding-top: 4px;
   padding-left: 20px;
   padding-right: 20px;
   border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
@@ -51,7 +52,7 @@ QWidget {
 /* Menubar, menus, and menu items */
 /* https://doc.qt.io/qt-5/stylesheet-examples.html#customizing-qmenubar */
 
-QMenu::item:pressed, QMenuBar::item:pressed, QMenu::item:selected, QMenuBar::item:selected {
+QMenu::item:pressed, QMenuBar::item:pressed, QMenu::item:selected {
 	color: white;
     background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); /* Intensive blue */
 }
