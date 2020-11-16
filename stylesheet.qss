@@ -1,10 +1,24 @@
 /* https://doc.qt.io/qt-5/stylesheet-customizing.html */
 /* https://doc.qt.io/qt-5/stylesheet-examples.html */
+/* https://github.com/nphase/qt-ping-grapher/blob/master/resources/darkorange.stylesheet */
 
-QPushButton, QProgressBar {
+/* FIXME: Would like a gradient from #e7e8eb to #f7f7f7 
+/* but running into a black background issue:
+/* https://forum.qt.io/topic/90348/setting-qlineargradient-with-stylesheet-always-shows-black/3 */
+QToolBar {
+  background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab);
+  background-color: #e7e8eb;
+}
+
+QPushButton {
   height: 20px;
-  padding-top: 4px; /* Move text down a bit. TODO: Do this only to text in buttons, but not to icons in buttons */
   background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #ddd, stop: 0.39 #eee, stop: 0.4 #ccc, stop: 1 #fff);
+}
+
+QProgressBar {
+  height: 20px;
+  background-color: white;
+  text-align: center;
 }
 
 /* FIXME: We end up with a black background for the QProgressBar and the text is no longer centered. Why? Probably because if we start customizing some aspects of a complex widget like QProgressBar, we need to customize ALL of them */
@@ -63,4 +77,12 @@ QMenuBar, QMenuBar::item {
 
 QMenu, QMenu::item {
 	background: #eee;
+}
+
+
+/* Filer left-hand pane, FIXME: Does not work */
+/* TODO: Check Filer with https://github.com/robertknight/Qt-Inspector or GammaRay on Linux */
+QObject[objectName="sidePane"] {
+    background-color: red;
+	background-color: blue;
 }
