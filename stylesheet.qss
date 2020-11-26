@@ -40,9 +40,10 @@ QPushButton:hover {
 /* Seems to work but if we start customizing some aspects, we need to customize ALL of them */
 QPushButton {
   height: 20px;
-  padding-top: 4px;
+  padding-top: 3px;
   padding-left: 20px;
   padding-right: 20px;
+  padding-bottom: 1px;
   border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
