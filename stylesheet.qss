@@ -2,6 +2,7 @@
 /* https://doc.qt.io/qt-5/stylesheet-examples.html */
 /* https://github.com/nphase/qt-ping-grapher/blob/master/resources/darkorange.stylesheet */
 
+
 /* FIXME: Would like a gradient from #e7e8eb to #f7f7f7 
 /* but running into a black background issue:
 /* https://forum.qt.io/topic/90348/setting-qlineargradient-with-stylesheet-always-shows-black/3 */
@@ -10,15 +11,11 @@ QToolBar {
   background-color: #e7e8eb;
 }
 
-QPushButton {
-  height: 20px;
-  background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #ddd, stop: 0.39 #eee, stop: 0.4 #ccc, stop: 1 #fff);
-}
-
 QProgressBar {
   height: 20px;
   background-color: white;
   text-align: center;
+  color: transparent; /* The percentage text */
 }
 
 /* FIXME: We end up with a black background for the QProgressBar and the text is no longer centered. Why? Probably because if we start customizing some aspects of a complex widget like QProgressBar, we need to customize ALL of them */
@@ -41,13 +38,14 @@ QPushButton:hover {
 QPushButton {
   height: 20px;
   padding-top: 3px;
+  padding-bottom: 1px;
   padding-left: 20px;
   padding-right: 20px;
-  padding-bottom: 1px;
   border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
   border-color: grey;
+  background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #ddd, stop: 0.39 #eee, stop: 0.4 #ccc, stop: 1 #fff);
 }
 
 /* FIXME: Seems not to work yet. We want more space between the Cancel, OK,... buttons in dialog boxes and the text above them */
@@ -73,7 +71,7 @@ QMenu::item:pressed, QMenuBar::item:pressed, QMenu::item:selected {
 }
 
 QMenuBar, QMenuBar::item {
-	background: transparent;
+	background: transparent; /* Otherwise it gets colored when hovering */
 }
 
 QMenu, QMenu::item {
@@ -81,9 +79,42 @@ QMenu, QMenu::item {
 }
 
 
-/* Filer left-hand pane, FIXME: Does not work */
+/* Filer left-hand pane, FIXME: Does not work (DOES work in qt-creator GUI editor!) */
 /* TODO: Check Filer with https://github.com/robertknight/Qt-Inspector or GammaRay on Linux */
 QObject[objectName="sidePane"] {
-    background-color: red;
-	background-color: blue;
+	background-color: yellow;
 }
+
+/* 'searchLineEdit->setObjectName("actionSearch");' is used in source code (DOES work!) */
+/* FIXME: are we using setStyleSheet in the source code somewhere, ovveriding parts of this? */
+QLineEdit#actionSearch {
+	border-radius: 0px; /* FIXME: Does not work, why? */
+	background-color: transparent; /* Works */
+	padding-left: 10px; /* Works */
+    padding-right: 10px; /* Works */
+    height: 100%; /* Works */
+    border-width: 0px; /* Works */
+    border-style: solid;
+    border-color: grey;
+}
+
+QLineEdit#actionSearch:focus {
+	color: white; /* The text */
+	background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); /* Like menu */
+    height: 100%; /* Works */
+}
+
+QListView#actionCompleterPopup {
+	background: #eee; /* Works */
+	selection-background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); /* Works, Intensive blue */
+}
+
+/* FIXME: Works for other QListViews but not the one in Action Search. Why? 
+QListView::item {
+    padding: 10px; 
+}
+
+QListView::item:hover {
+    background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); 
+}
+*/
