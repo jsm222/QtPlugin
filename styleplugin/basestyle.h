@@ -93,8 +93,6 @@ public:
     void polish(QWidget *widget) override;
     void unpolish(QWidget *widget) override;
 
-    bool isDarkMode() const;
-
 protected:
     /**
      * @return Paths to application stylesheets

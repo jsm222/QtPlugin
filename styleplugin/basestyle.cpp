@@ -3267,7 +3267,7 @@ QPalette BaseStyle::darkModePalette()
 
 QPalette BaseStyle::standardPalette() const
 {
-    return isDarkMode() ? darkModePalette() : lightModePalette();
+    return lightModePalette();
 
     // QColor backGround(251, 251, 251);
     // QColor light = backGround.lighter(150);
@@ -4557,12 +4557,6 @@ void BaseStyle::unpolish(QWidget *widget)
     }
 
     m_shadowHelper->unregisterWidget(widget);
-}
-
-bool BaseStyle::isDarkMode() const
-{
-    QSettings settings(QSettings::UserScope, "panda", "theme");
-    return settings.value("DarkMode", false).toBool();
 }
 
 QRect BaseStyle::subControlRect(ComplexControl control,

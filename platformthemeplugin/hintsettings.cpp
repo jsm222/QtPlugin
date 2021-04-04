@@ -60,9 +60,6 @@ HintsSettings::~HintsSettings()
 
 void HintsSettings::lazyInit()
 {
-    m_fileWatcher = new QFileSystemWatcher();
-    m_fileWatcher->addPath(m_settingsFile);
-    connect(m_fileWatcher, &QFileSystemWatcher::fileChanged, this, &HintsSettings::onFileChanged);
 }
 
 QStringList HintsSettings::xdgIconThemePaths() const
@@ -92,44 +89,10 @@ QString HintsSettings::systemFixedFont() const
 
 qreal HintsSettings::systemFontPointSize() const
 {
-    return m_settings->value(s_systemPointFontSize, 11).toDouble(); // was 10.5
+    return m_settings->value(s_systemPointFontSize, 11.5).toDouble(); // was 10.5
 }
 
 bool HintsSettings::darkMode()
 {
     return m_settings->value(s_darkModeName, false).toBool();
-}
-
-void HintsSettings::onFileChanged(const QString &path)
-{
-    QVariantMap map;
-    for (const QString &value : m_settings->allKeys()) {
-        map[value] = m_settings->value(value);
-    }
-
-    m_settings->sync();
-
-    for (const QString &value : m_settings->allKeys()) {
-        const QVariant &oldValue = map.value(value);
-        const QVariant &newValue = m_settings->value(value);
-
-        if (oldValue != newValue) {
-            if (value == s_systemFontName)
-                emit systemFontChanged(newValue.toString());
-            else if (value == s_systemFixedFontName)
-                emit systemFixedFontChanged(newValue.toString());
-            else if (value == s_systemPointFontSize)
-                emit systemFontPointSizeChanged(newValue.toDouble());
-            else if (value == s_darkModeName) {
-                emit darkModeChanged(newValue.toBool());
-                // Need to update the icon to dark
-                m_hints[QPlatformTheme::SystemIconThemeName] = darkMode() ? s_darkIconName : s_lightIconName;
-                emit iconThemeChanged();
-            }
-        }
-    }
-
-    bool fileDeleted = !m_fileWatcher->files().contains(m_settingsFile);
-    if (fileDeleted)
-        m_fileWatcher->addPath(m_settingsFile);
 }
