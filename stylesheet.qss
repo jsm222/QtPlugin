@@ -2,6 +2,9 @@
 /* https://doc.qt.io/qt-5/stylesheet-examples.html */
 /* https://github.com/nphase/qt-ping-grapher/blob/master/resources/darkorange.stylesheet */
 
+QWidget {
+    font-size: 10pt;
+}
 
 /* FIXME: Would like a gradient from #e7e8eb to #f7f7f7 
 /* but running into a black background issue:
@@ -36,12 +39,13 @@ QPushButton:hover {
 
 /* Seems to work but if we start customizing some aspects, we need to customize ALL of them */
 QPushButton {
-  height: 20px;
+  font-size: 11.5pt;
+  height: 22px;
   padding-top: 3px;
   padding-bottom: 1px;
   padding-left: 20px;
   padding-right: 20px;
-  border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
+  border-radius: 14px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
   border-color: grey;
