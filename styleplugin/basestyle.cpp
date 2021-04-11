@@ -61,6 +61,7 @@
 #include <cmath>
 
 #include <QStandardPaths>
+#include <QDebug>
 
 QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
@@ -4462,7 +4463,7 @@ void BaseStyle::polish(QApplication* app)
     QCommonStyle::polish(app);
 
     app->setPalette(standardPalette());
-
+/*
     // probono: For unkown reasons, 'filer-qt --desktop' crashes
     // when we apply a stylesheet.
     // FIXME: This is a very crude workaround, we need to find and fix the underlying issue!
@@ -4470,6 +4471,7 @@ void BaseStyle::polish(QApplication* app)
        qDebug("probono: FIXME: Crude workaround: Do not apply stylesheet to application invoked with --desktop");
        return;
     }
+*/
 
     // probono: Use ~/.config/stylesheet.qss or /etc/xdg/tylesheet.qss if exists
     QString qsspath;
@@ -4480,7 +4482,14 @@ void BaseStyle::polish(QApplication* app)
         QFile File(qsspath);
         File.open(QFile::ReadOnly);
         QString StyleSheet = QLatin1String(File.readAll());
-        app->setStyleSheet(StyleSheet);
+
+        // probono: No matter what the stylesheet may say, we want to set the font size
+        if (app->applicationFilePath().contains("menu")) {
+            qDebug() << "probono: Hardcoding font size for menu to 11.5pt";
+            app->setStyleSheet(StyleSheet + "QWidget { font-size: 11.5pt; }");
+        } else {
+            app->setStyleSheet(StyleSheet);
+        }
     }
 
     // app->setStyleSheet("QWidget { background-color: yellow; } QPushButton { background-color: blue; }"); // probono
