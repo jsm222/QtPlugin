@@ -122,3 +122,7 @@ QListView::item:hover {
     background: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #7c90ff, stop: 0.1 #6f84f1, stop: 0.9 #4655f0, stop: 1 #3b44ab); 
 }
 */
+
+MainWindow#menuBar {
+    background-color: QLinearGradient( x1: 0, y1: 0, x2: 0, y2: 1, stop: 0 #fff, stop: 0.1 #eee, stop: 0.39 #eee, stop: 0.4 #ddd, stop: 1 #eee);
+}
