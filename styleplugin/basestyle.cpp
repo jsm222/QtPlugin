@@ -759,8 +759,12 @@ namespace Phantom
             // On mac the DPI is always 72 so we should not scale it
             return value;
 #else
-            const qreal scale = qt_defaultDpiX() / 96.0;
-            return value * scale;
+            // const qreal scale = qt_defaultDpiX() / 96.0;
+            // return value * scale;
+            // probono: We don't want our widgets to be different size
+            // based on dpi; hence we do similar to what is done for mac
+            return value;
+
 #endif
         }
 
@@ -798,8 +802,8 @@ namespace Phantom
             m.leftMargin = static_cast<int>(fontHeight * MenuItem_LeftMarginFontRatio);
             m.rightMarginForText = static_cast<int>(fontHeight * MenuItem_RightMarginForTextFontRatio);
             m.rightMarginForArrow = static_cast<int>(fontHeight * MenuItem_RightMarginForArrowFontRatio);
-            m.topMargin = static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
-            m.bottomMargin = static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
+            m.topMargin = 2; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
+            m.bottomMargin = 2; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
             int checkVMargin = static_cast<int>(fontHeight * MenuItem_CheckMarkVerticalInsetFontRatio);
             int checkHeight = fontHeight - checkVMargin * 2;
             if (checkHeight < 0)
@@ -4207,8 +4211,10 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         return QSize(size.width() + w + margins, qMax(size.height(), h));
     }
     case CT_MenuBarItem: {
-        return QSize(QCommonStyle::sizeFromContents(type, option, size, widget) + QSize(8, 5));
-
+        // probono: Hardcoding height to the same value as TOPBAR_HEIGHT in our Menu applicaiton
+        return QSize(size.width() + 10, 22);
+        // return QSize(QCommonStyle::sizeFromContents(type, option, size, widget) + QSize(8, 5));
+        //
         // int fontHeight = option ? option->fontMetrics.height() : size.height();
         // int w = static_cast<int>(fontHeight * Ph::MenuBar_HorizontalPaddingFontRatio);
         // int h = static_cast<int>(fontHeight * Ph::MenuBar_VerticalPaddingFontRatio);
