@@ -104,11 +104,11 @@ namespace Phantom
 {
     namespace
     {
-        constexpr qint16 DefaultFrameWidth = 6;
+        constexpr qint16 DefaultFrameWidth = 2; // probono: was 6
         constexpr qint16 SplitterMaxLength = 100; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
         constexpr qint16 MenuBar_FrameWidth = 6;
-        constexpr qint16 MenuBar_ItemSpacing = 10;
+        constexpr qint16 MenuBar_ItemSpacing = 0; // probono: was 10
         constexpr qint16 SpinBox_ButtonWidth = 15;
 
         // These two are currently not based on font, but could be
