@@ -4212,7 +4212,7 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
     }
     case CT_MenuBarItem: {
         // probono: Hardcoding height to the same value as TOPBAR_HEIGHT in our Menu applicaiton
-        return QSize(size.width() + 10, 22);
+        return QSize(size.width() + 22, 22); // probono: The first number is twice the pixels for left and right padding, the second number is the height 
         // return QSize(QCommonStyle::sizeFromContents(type, option, size, widget) + QSize(8, 5));
         //
         // int fontHeight = option ? option->fontMetrics.height() : size.height();
