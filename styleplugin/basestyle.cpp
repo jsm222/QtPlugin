@@ -802,8 +802,16 @@ namespace Phantom
             m.leftMargin = static_cast<int>(fontHeight * MenuItem_LeftMarginFontRatio);
             m.rightMarginForText = static_cast<int>(fontHeight * MenuItem_RightMarginForTextFontRatio);
             m.rightMarginForArrow = static_cast<int>(fontHeight * MenuItem_RightMarginForArrowFontRatio);
-            m.topMargin = 2; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
-            m.bottomMargin = 2; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
+#if defined(__FreeBSD__)
+            // probono: TODO: Understand why we get different fontHeight on FreeBSD vs. Debian
+            // and solve that. In the meantime, use ifdef as a workaround
+            m.topMargin = 3; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
+            m.bottomMargin = 3; // probono: was: static_cast<int>(fontHeight * MenuItem_VerticalMarginsFontRatio);
+#else
+            // The following has been tested on Debian
+            m.topMargin = 0;
+            m.bottomMargin = 1;
+#endif
             int checkVMargin = static_cast<int>(fontHeight * MenuItem_CheckMarkVerticalInsetFontRatio);
             int checkHeight = fontHeight - checkVMargin * 2;
             if (checkHeight < 0)
@@ -817,7 +825,7 @@ namespace Phantom
             m.separatorHeight = static_cast<int>(fontHeight * MenuItem_SeparatorHeightFontRatio);
             // Odd numbers only
             m.separatorHeight = (m.separatorHeight / 2) * 2 + 1;
-            m.totalHeight = fontHeight + m.frameThickness * 2 + m.topMargin + m.bottomMargin;
+            m.totalHeight = fontHeight + m.topMargin + m.bottomMargin;
             return m;
         }
 
