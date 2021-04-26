@@ -41,11 +41,11 @@ QPushButton:hover {
 QPushButton {
   font-size: 11.5pt;
   height: 22px;
-  padding-top: 3px;
-  padding-bottom: 1px;
+  padding-top: 0px;
+  padding-bottom: 2px;
   padding-left: 20px;
   padding-right: 20px;
-  border-radius: 14px; /* If we make this too large, then we get no rounded corners at all... why? */
+  border-radius: 13px; /* If we make this too large, then we get no rounded corners at all... why? */
   border-width: 1px;
   border-style: solid;
   border-color: grey;
