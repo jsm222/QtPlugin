@@ -122,9 +122,9 @@ namespace Phantom
         constexpr qreal DefaultFrame_Radius = 0.0;
         constexpr qreal TabBarTab_Rounding = 1.0;
         constexpr qreal SpinBox_Rounding = 5.0;
-        constexpr qreal LineEdit_Rounding = 5.0;
+        constexpr qreal LineEdit_Rounding = 2.0; // probono: was: 5.0;
         constexpr qreal FrameFocusRect_Rounding = 5.0;
-        constexpr qreal PushButton_Rounding = 15.0;
+        constexpr qreal PushButton_Rounding = 11.0; // probono: was: 15.0
         constexpr qreal ToolButton_Rounding = 5.0;
         constexpr qreal ProgressBar_Rounding = 0.0;
         constexpr qreal GroupBox_Rounding = 5.0;
