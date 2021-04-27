@@ -1982,6 +1982,12 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
     case PE_FrameDefaultButton:
         break;
     case PE_FrameFocusRect: {
+        break; 
+        // probono: We do not want frames around widgets that have keyboard focus;
+        // also see https://doc.qt.io/qt-5/qfocusframe.html
+        // TODO: Should probably make this more sophisticated, e.g., make it possible to switch it on
+        // similar to Qt::WA_MacShowFocusRect, and possibly show it
+        // after the user has pressed the tab key, or something like that
         auto fropt = qstyleoption_cast<const QStyleOptionFocusRect*>(option);
         if (!fropt)
             break;
