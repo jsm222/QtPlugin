@@ -89,7 +89,7 @@ QString HintsSettings::systemFixedFont() const
 
 qreal HintsSettings::systemFontPointSize() const
 {
-    return m_settings->value(s_systemPointFontSize, 11.5).toDouble(); // was 10.5
+    return m_settings->value(s_systemPointFontSize, 10).toDouble(); // was 10.5
 }
 
 bool HintsSettings::darkMode()

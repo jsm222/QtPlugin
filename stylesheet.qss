@@ -2,10 +2,6 @@
 /* https://doc.qt.io/qt-5/stylesheet-examples.html */
 /* https://github.com/nphase/qt-ping-grapher/blob/master/resources/darkorange.stylesheet */
 
-QWidget {
-    font-size: 10pt;
-}
-
 /* FIXME: Would like a gradient from #e7e8eb to #f7f7f7 
 /* but running into a black background issue:
 /* https://forum.qt.io/topic/90348/setting-qlineargradient-with-stylesheet-always-shows-black/3 */
