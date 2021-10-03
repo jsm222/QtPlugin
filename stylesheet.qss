@@ -10,6 +10,10 @@ QToolBar {
   background-color: #e7e8eb;
 }
 
+QStatusBar {
+  background-color: #e7e8eb;
+}
+
 QProgressBar {
   height: 20px;
   background-color: white;
