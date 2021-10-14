@@ -102,6 +102,7 @@ PandaPlatformTheme::PandaPlatformTheme()
     connect(m_hints, &HintsSettings::darkModeChanged, &onDarkModeChanged);
 
     QCoreApplication::setAttribute(Qt::AA_DontUseNativeMenuBar, false);
+    QCoreApplication::setAttribute(Qt::AA_DontShowIconsInMenus, true); // probono: need to use myAction->setIconVisibleInMenu(true); for menu items that shall get the icon nevertheless
 }
 
 PandaPlatformTheme::~PandaPlatformTheme()
