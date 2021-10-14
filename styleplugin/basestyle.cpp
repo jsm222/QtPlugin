@@ -4504,7 +4504,7 @@ void BaseStyle::polish(QApplication* app)
         QString StyleSheet = QLatin1String(File.readAll());
 
         // probono: No matter what the stylesheet may say, we want to set the font size
-        if (app->applicationFilePath().contains("menu")) {
+        if (app->applicationFilePath().endsWith("Menu")) {
             qDebug() << "probono: Hardcoding font size for menu to 11.5pt";
             app->setStyleSheet(StyleSheet + "QWidget { font-size: 11.5pt; }");
         } else {
