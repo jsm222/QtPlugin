@@ -5049,7 +5049,7 @@ int BaseStyle::styleHint(StyleHint hint,
     case SH_MessageBox_TextInteractionFlags:
         return Qt::TextSelectableByMouse | Qt::LinksAccessibleByMouse;
     case SH_WizardStyle:
-        return QWizard::ClassicStyle;
+        return QWizard::MacStyle; // probono
     case SH_Menu_SubMenuPopupDelay:
         // Returning 0 will break sloppy submenus even if they're enabled
         return 10;
@@ -5067,12 +5067,10 @@ int BaseStyle::styleHint(StyleHint hint,
         return 1;
     case SH_Menu_SubMenuResetWhenReenteringParent:
         return 0;
-#ifdef Q_OS_MAC
     case SH_Menu_FlashTriggeredItem:
-        return 1;
+        return 1; // probono
     case SH_Menu_FadeOutOnHide:
-        return 0;
-#endif
+        return 0;  // probono
     case SH_WindowFrame_Mask:
         return 0;
     case SH_UnderlineShortcut: {
