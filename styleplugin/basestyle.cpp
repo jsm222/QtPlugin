@@ -62,6 +62,10 @@
 
 #include <QStandardPaths>
 #include <QDebug>
+#include <QMessageBox>
+#include <QErrorMessage>
+
+#include "sound.h"
 
 QT_BEGIN_NAMESPACE
 Q_GUI_EXPORT int qt_defaultDpiX();
@@ -4545,6 +4549,21 @@ void BaseStyle::polish(QWidget *widget)
             ) {
         widget->setAttribute(Qt::WA_Hover, true);
         widget->setAttribute(Qt::WA_OpaquePaintEvent, false);
+    }
+
+    // probono: Alert sounds
+    if (qobject_cast<QMessageBox *>(widget)) {
+        QMessageBox::Icon icon = qobject_cast<QMessageBox *>(widget)->icon();
+        if (icon) {
+            // qDebug() <<"probono: Icon:" << qobject_cast<QMessageBox *>(widget)->icon();
+            if(icon == QMessageBox::Question || QMessageBox::Information || QMessageBox::Warning || QMessageBox::Critical ) {
+                // TOOD: Might use different sounds for the different types of QMessageBox
+                sound::playSound("ping.wav");
+            }
+        }
+    }
+    if (qobject_cast<QErrorMessage *>(widget)) {
+            sound::playSound("ping.wav");
     }
 
     if (qobject_cast<QMenu *>(widget)) {
