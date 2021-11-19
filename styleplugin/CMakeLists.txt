@@ -16,6 +16,8 @@ find_package(KF5 REQUIRED WindowSystem)
 
 include(ECMQueryQmake)
 
+include(GNUInstallDirs)
+
 set (SRCS
     blurhelper.cpp
     blurhelper.h
