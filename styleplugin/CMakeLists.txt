@@ -14,13 +14,9 @@ find_package(Qt5 REQUIRED ${QT})
 find_package(PkgConfig REQUIRED)
 find_package(KF5 REQUIRED WindowSystem)
 
-include(ECMQueryQmake)
-
 include(GNUInstallDirs)
 
 set (SRCS
-    blurhelper.cpp
-    blurhelper.h
     pstyleplugin.cpp
     pstyleplugin.h
     basestyle.h
@@ -47,8 +43,6 @@ target_link_libraries(${TARGET}
     KF5::WindowSystem
     Qt5::Multimedia
     )
-
-query_qmake(CMAKE_INSTALL_QTPLUGINDIR QT_INSTALL_PLUGINS)
 
 set(SOUND_FILES
     ../sounds/ping.wav

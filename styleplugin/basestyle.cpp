@@ -23,7 +23,6 @@
 #include "basestyle.h"
 #include "phantomcolor.h"
 #include "shadowhelper.h"
-#include "blurhelper.h"
 
 #include <QAbstractItemView>
 #include <QApplication>
@@ -92,17 +91,6 @@ QRectF strokedRect( const QRect &rect, const int penWidth )
 {
     return strokedRect(QRectF(rect), penWidth);
 }
-
-extern void qt_blurImage(QImage &blurImage, qreal radius, bool quality, int transposed);
-
-// Redefine Q_FALLTHROUGH for older Qt versions
-#ifndef Q_FALLTHROUGH
-#if (defined(Q_CC_GNU) && Q_CC_GNU >= 700) && !defined(Q_CC_INTEL)
-#define Q_FALLTHROUGH() __attribute__((fallthrough))
-#else
-#define Q_FALLTHROUGH() (void)0
-#endif
-#endif
 
 namespace Phantom
 {
@@ -1427,8 +1415,7 @@ BaseStylePrivate::BaseStylePrivate()
 
 BaseStyle::BaseStyle()
     : d(new BaseStylePrivate),
-      m_shadowHelper(new ShadowHelper(this)),
-      m_blurHelper(new BlurHelper(this))
+      m_shadowHelper(new ShadowHelper(this))
 {
     setObjectName(QLatin1String("Phantom"));
 
@@ -2195,15 +2182,6 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         painter->setBrush(background);
         QRectF frameRect = strokedRect(option->rect, 1);
         painter->drawRoundedRect(frameRect, radius, radius);
-
-        // blur
-        if (widget && widget->window()) {
-            QPainterPath path;
-            path.addRoundedRect(option->rect, radius, radius);
-            const_cast<QWidget *>(widget)->setMask(path.toFillPolygon().toPolygon());
-            m_blurHelper->update(const_cast<QWidget *>(widget));
-        }
-
         painter->restore();
         break;
     }
@@ -4568,7 +4546,6 @@ void BaseStyle::polish(QWidget *widget)
 
     if (qobject_cast<QMenu *>(widget)) {
         widget->setAttribute(Qt::WA_TranslucentBackground, false); // was: true
-        m_blurHelper->registerWidget(widget);
     }
 
     if (widget->inherits("QTipLabel") || widget->inherits("QComboBoxPrivateContainer")) {
@@ -4597,7 +4574,6 @@ void BaseStyle::unpolish(QWidget *widget)
 
     if (qobject_cast<QMenu *>(widget)) {
         widget->setAttribute(Qt::WA_TranslucentBackground, false);
-        m_blurHelper->unregisterWidget(widget);
     }
 
     if (widget->inherits("QTipLabel")) {

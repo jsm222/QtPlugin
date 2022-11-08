@@ -36,8 +36,6 @@
 #include <xcb/xcb.h>
 
 static const char s_schemePropertyName[] = "KDE_COLOR_SCHEME_PATH";
-static const QByteArray s_blurBehindPropertyName = QByteArrayLiteral("ENABLE_BLUR_BEHIND_HINT");
-static const QByteArray s_blurRegionPropertyName = QByteArrayLiteral("BLUR_REGION");
 
 X11Integration::X11Integration()
     : QObject()
@@ -62,28 +60,6 @@ bool X11Integration::eventFilter(QObject *watched, QEvent *event)
         info.setWindowType(NET::DNDIcon);
         // TODO: does this flash the xcb connection?
     }
-
-    // if (event->type() == QEvent::PlatformSurface) {
-    //     if (QWindow *w = qobject_cast<QWindow*>(watched)) {
-    //         QPlatformSurfaceEvent *pe = static_cast<QPlatformSurfaceEvent*>(event);
-    //         if (!w->flags().testFlag(Qt::ForeignWindow)) {
-    //             if (pe->surfaceEventType() == QPlatformSurfaceEvent::SurfaceCreated) {
-    //                 const auto blurBehindProperty = w->property(s_blurBehindPropertyName.constData());
-    //                 if (blurBehindProperty.isValid()) {
-    //                     KWindowEffects::enableBlurBehind(w->winId(), blurBehindProperty.toBool());
-    //                 }
-    //                 installDesktopFileName(w);
-    //             }
-    //         }
-    //     }
-    // }
-
-    // if (event->type() == QEvent::ApplicationPaletteChange) {
-    //     const auto topLevelWindows = QGuiApplication::topLevelWindows();
-    //     for (QWindow *w : topLevelWindows) {
-    //         installColorScheme(w);
-    //     }
-    // }
 
     return false;
 }
