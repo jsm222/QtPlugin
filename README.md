@@ -4,6 +4,12 @@ Qt platform plugin and style. Exports windows to KDE-style global menus via D-Bu
 
 ## Dependencies
 
+On Alpine Linux:
+
+```
+apk add qt5-qtbase-dev libqtxdg-dev extra-cmake-modules libdbusmenu-qt-dev xcb-util-wm-dev cmake musl-dev alpine-sdk clang
+```
+
 On Arch Linux:
 
 ```
