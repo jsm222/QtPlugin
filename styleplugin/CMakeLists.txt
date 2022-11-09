@@ -48,6 +48,21 @@ set(SOUND_FILES
     ../sounds/ping.wav
 )
 
-install(TARGETS ${TARGET} DESTINATION ${CMAKE_INSTALL_QTPLUGINDIR}/styles/)
+get_target_property(QT_QMAKE_EXECUTABLE ${Qt5Core_QMAKE_EXECUTABLE} IMPORTED_LOCATION)
+if(NOT QT_QMAKE_EXECUTABLE)
+    message(FATAL_ERROR "qmake is not found.")
+endif()
+
+execute_process(COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
+    OUTPUT_VARIABLE QT_PLUGINS_DIR
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+)
+if(QT_PLUGINS_DIR)
+    message(STATUS "Qt5 plugin directory:" "${QT_PLUGINS_DIR}")
+else()
+    message(FATAL_ERROR "Qt5 plugin directory cannot be detected.")
+endif()
+
+install(TARGETS ${TARGET} DESTINATION ${QT_PLUGINS_DIR}/styles/)
 
 install(FILES ${SOUND_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/panda/sounds")
