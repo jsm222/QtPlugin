@@ -66,3 +66,5 @@ endif()
 install(TARGETS ${TARGET} DESTINATION ${QT_PLUGINS_DIR}/styles/)
 
 install(FILES ${SOUND_FILES} DESTINATION "${CMAKE_INSTALL_DATADIR}/panda/sounds")
+
+install(FILES ../stylesheet.qss DESTINATION etc/xdg)
