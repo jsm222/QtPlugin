@@ -99,7 +99,7 @@ namespace Phantom
         constexpr qint16 DefaultFrameWidth = 2; // probono: was 6
         constexpr qint16 SplitterMaxLength = 100; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
-        constexpr qint16 MenuBar_FrameWidth = 6;
+        constexpr qint16 MenuBar_FrameWidth = 3;
         constexpr qint16 MenuBar_ItemSpacing = 0; // probono: was 10
         constexpr qint16 SpinBox_ButtonWidth = 15;
 
@@ -1454,7 +1454,7 @@ void BaseStyle::drawItemText(QPainter* painter,
         changed = true;
         painter->setPen(QPen(newBrush, savedPen.widthF()));
     }
-    painter->drawText(rect, alignment, text);
+    painter->drawText(rect, alignment, text); // probono: This is what draws text in the menu bar
     if (changed) {
         painter->setPen(savedPen);
     }
@@ -4207,8 +4207,8 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         return QSize(size.width() + w + margins, qMax(size.height(), h));
     }
     case CT_MenuBarItem: {
-        // probono: Hardcoding height to the same value as TOPBAR_HEIGHT in our Menu applicaiton
-        return QSize(size.width() + 22, 22); // probono: The first number is twice the pixels for left and right padding, the second number is the height 
+        // probono: Hardcoding height to the same value as TOPBAR_HEIGHT in our Menu application
+        return QSize(size.width() + 18, 22); // probono: The first number is twice the pixels for left and right padding, the second number is the height
         // return QSize(QCommonStyle::sizeFromContents(type, option, size, widget) + QSize(8, 5));
         //
         // int fontHeight = option ? option->fontMetrics.height() : size.height();
@@ -4269,7 +4269,8 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         if (isSeparator) {
             h = metrics.separatorHeight;
         } else {
-            h = metrics.totalHeight;
+            // h = metrics.totalHeight;
+            h = 22; // probono: Hardcoding height to the same value as TOPBAR_HEIGHT in our Menu application
         }
         if (!menuItem->icon.isNull()) {
             if (auto combo = qobject_cast<const QComboBox*>(widget)) {
@@ -4281,31 +4282,13 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
         sz.setHeight(h);
         return sz;
     }
+    // The whole menu, including all of its menu items
     case CT_Menu: {
-        if (!Ph::MenuExtraBottomMargin || !option || !widget)
-            break;
-        // Trick the QMenu into putting a margin only at the bottom by adding extra
-        // height to the contents size. We only want to add this tricky space if
-        // there is at least more than 1 item in the menu.
-        const auto acts = widget->actions();
-        if (acts.count() < 2)
-            break;
-        // We only want to add the tricky space if there's at least 1 separator,
-        // otherwise it looks weird.
-        bool anySeps = false;
-        for (auto act : acts) {
-            if (act->isSeparator()) {
-                anySeps = true;
-                break;
-            }
-        }
-        if (!anySeps)
-            break;
-        // int fheight = option->fontMetrics.height();
-        // int vmargin = static_cast<int>(fheight * Ph::MenuItem_SeparatorHeightFontRatio) / 2;
-        // QSize sz = size;
-        // sz.setHeight(sz.height() + vmargin);
-        return size;
+        // probono: Decrease menu width by 1 pixel as long as hovering misses 1 pixel
+        // FIXME: Remove this workaround once we get the hover highlight to full width
+        QSize sz = size;
+        sz.setWidth(sz.width()-1);
+        return sz;
     }
     case CT_TabBarTab: {
         // Placeholder in case we change this in the future
@@ -4487,11 +4470,12 @@ void BaseStyle::polish(QApplication* app)
 
         // probono: No matter what the stylesheet may say, we want to set the font size
         if (app->applicationFilePath().endsWith("Menu")) {
-            qDebug() << "probono: Hardcoding font size for menu to 11.5pt";
-            app->setStyleSheet(StyleSheet + "QWidget { font-size: 11.5pt; }");
+            qDebug() << "probono: Hardcoding font size for menu to 15px";
+            app->setStyleSheet(StyleSheet + "QWidget { font-size: 15px; }");
         } else {
-            app->setStyleSheet(StyleSheet);
+            app->setStyleSheet(StyleSheet + "QMenu { font-size: 15px; }" + "QMenuBar { font-size: 15px; }");
         }
+
     }
 
     // app->setStyleSheet("QWidget { background-color: yellow; } QPushButton { background-color: blue; }"); // probono
