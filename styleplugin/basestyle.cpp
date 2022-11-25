@@ -96,11 +96,11 @@ namespace Phantom
 {
     namespace
     {
-        constexpr qint16 DefaultFrameWidth = 2; // probono: was 6
+        constexpr qint16 DefaultFrameWidth = 2; // probono: was: 6
         constexpr qint16 SplitterMaxLength = 100; // Length of splitter handle (not thickness)
         constexpr qint16 MenuMinimumWidth = 20; // Smallest width that menu items can have
         constexpr qint16 MenuBar_FrameWidth = 3;
-        constexpr qint16 MenuBar_ItemSpacing = 0; // probono: was 10
+        constexpr qint16 MenuBar_ItemSpacing = 0; // probono: was: 10
         constexpr qint16 SpinBox_ButtonWidth = 15;
 
         // These two are currently not based on font, but could be
@@ -117,7 +117,7 @@ namespace Phantom
         constexpr qreal LineEdit_Rounding = 2.0; // probono: was: 5.0;
         constexpr qreal FrameFocusRect_Rounding = 5.0;
         constexpr qreal PushButton_Rounding = 11.0; // probono: was: 15.0
-        constexpr qreal ToolButton_Rounding = 5.0;
+        constexpr qreal ToolButton_Rounding = 1.0; // probono: was: 5.0
         constexpr qreal ProgressBar_Rounding = 0.0;
         constexpr qreal GroupBox_Rounding = 5.0;
         constexpr qreal SliderGroove_Rounding = 5.0;
@@ -792,7 +792,7 @@ namespace Phantom
             m.fontHeight = fontHeight;
             m.frameThickness = dpiScaled(1.0);
             m.leftMargin = static_cast<int>(fontHeight * MenuItem_LeftMarginFontRatio);
-            m.rightMarginForText = static_cast<int>(fontHeight * MenuItem_RightMarginForTextFontRatio);
+            m.rightMarginForText = static_cast<int>(fontHeight * MenuItem_RightMarginForTextFontRatio) + 20; // probono: Added 20 to help Filer desktop context menus
             m.rightMarginForArrow = static_cast<int>(fontHeight * MenuItem_RightMarginForArrowFontRatio);
 #if defined(__FreeBSD__)
             // probono: TODO: Understand why we get different fontHeight on FreeBSD vs. Debian
@@ -1454,7 +1454,9 @@ void BaseStyle::drawItemText(QPainter* painter,
         changed = true;
         painter->setPen(QPen(newBrush, savedPen.widthF()));
     }
-    painter->drawText(rect, alignment, text); // probono: This is what draws text in the menu bar
+    QRect modifiedRect = rect;
+    modifiedRect.setY(rect.y()+1); // probono: Forcefully push down the text in the menu bar by 1px; https://github.com/helloSystem/Menu/issues/66
+    painter->drawText(modifiedRect, alignment, text); // probono: This is what draws text in the menu bar
     if (changed) {
         painter->setPen(savedPen);
     }
@@ -1780,6 +1782,7 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         break;
     }
     case PE_PanelButtonTool: {
+        // E.g., the close buttons in Quaternion
         bool isDown = option->state & State_Sunken;
         bool isOn = option->state & State_On;
         bool hasFocus = (option->state & State_HasFocus && option->state & State_KeyboardFocusChange);
@@ -1800,7 +1803,7 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         QRect r = option->rect;
         Ph::PSave save(painter);
         Ph::paintBorderedRoundRect(painter, r, rounding, swatch, outline, fill);
-        Ph::paintBorderedRoundRect(painter, r.adjusted(1, 1, -1, -1), rounding, swatch, specular, S_none);
+        // Ph::paintBorderedRoundRect(painter, r.adjusted(1, 1, -1, -1), rounding, swatch, specular, S_none);
         break;
     }
     case PE_IndicatorDockWidgetResizeHandle: {
@@ -2809,7 +2812,7 @@ void BaseStyle::drawControl(ControlElement element,
                 Ph::menuItemTextRect(metrics, option->direction, itemRect, hasSubMenu, hasIcon, menuItem->tabWidth);
             int t = s.indexOf(QLatin1Char('\t'));
             int text_flags =
-                Qt::AlignLeft | Qt::AlignTop | Qt::TextShowMnemonic | Qt::TextDontClip | Qt::TextSingleLine;
+                Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic | Qt::TextDontClip | Qt::TextSingleLine; // probno: Was: Qt::AlignTop instead of Qt::AlignVCenter; https://github.com/helloSystem/hello/issues/152#issuecomment-961380640
             if (!styleHint(SH_UnderlineShortcut, menuItem, widget))
                 text_flags |= Qt::TextHideMnemonic;
 #if 0
@@ -2879,14 +2882,15 @@ void BaseStyle::drawControl(ControlElement element,
             if (t >= 0) {
                 QRect mnemonicR =
                     Ph::menuItemMnemonicRect(metrics, option->direction, itemRect, hasSubMenu, menuItem->tabWidth);
+                mnemonicR.setY(textRect.y()-3); // probono: Move right-hand side up so that it is in line with left-hand side; https://github.com/helloSystem/hello/issues/152#issuecomment-961380640
                 const QStringRef textToDrawRef = s.mid(t + 1);
                 const QString unsafeTextToDraw = QString::fromRawData(textToDrawRef.constData(), textToDrawRef.size());
-                painter->drawText(mnemonicR, text_flags, unsafeTextToDraw);
+                painter->drawText(mnemonicR, text_flags, unsafeTextToDraw); // probono: This draws the right-hand side of text for menu items UNLESS there is a .qss style sheet
                 s = s.left(t);
             }
             const QStringRef textToDrawRef = s.left(t);
             const QString unsafeTextToDraw = QString::fromRawData(textToDrawRef.constData(), textToDrawRef.size());
-            painter->drawText(textRect, text_flags, unsafeTextToDraw);
+            painter->drawText(textRect, text_flags, unsafeTextToDraw); // probono: This draws the left-hand side of text for menu items UNLESS there is a .qss style sheet
 
 #if 0
                 painter->restore();
@@ -4286,8 +4290,11 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
     case CT_Menu: {
         // probono: Decrease menu width by 1 pixel as long as hovering misses 1 pixel
         // FIXME: Remove this workaround once we get the hover highlight to full width
+        // Note: This leads to menus to a 1px gap between menus and submenus, so this really needs to be solved in another way
+        // This hack does not seem to be needed when .qss is not needed
         QSize sz = size;
         sz.setWidth(sz.width()-1);
+        sz.setWidth(sz.width());
         return sz;
     }
     case CT_TabBarTab: {
@@ -4472,6 +4479,7 @@ void BaseStyle::polish(QApplication* app)
         if (app->applicationFilePath().endsWith("Menu")) {
             qDebug() << "probono: Hardcoding font size for menu to 15px";
             app->setStyleSheet(StyleSheet + "QWidget { font-size: 15px; }");
+            // app->setStyleSheet("QWidget { font-size: 15px; }");
         } else {
             app->setStyleSheet(StyleSheet + "QMenu { font-size: 15px; }" + "QMenuBar { font-size: 15px; }");
         }
@@ -4529,11 +4537,11 @@ void BaseStyle::polish(QWidget *widget)
     }
 
     if (qobject_cast<QMenu *>(widget)) {
-        widget->setAttribute(Qt::WA_TranslucentBackground, false); // was: true
+        widget->setAttribute(Qt::WA_TranslucentBackground, false); // probono: was: true
     }
 
     if (widget->inherits("QTipLabel") || widget->inherits("QComboBoxPrivateContainer")) {
-        widget->setAttribute(Qt::WA_TranslucentBackground, false); // was: true
+        widget->setAttribute(Qt::WA_TranslucentBackground, false); // probono: was: true
     }
 
     m_shadowHelper->registerWidget(widget);
