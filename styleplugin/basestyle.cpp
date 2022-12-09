@@ -116,7 +116,7 @@ namespace Phantom
         constexpr qreal SpinBox_Rounding = 5.0;
         constexpr qreal LineEdit_Rounding = 2.0; // probono: was: 5.0;
         constexpr qreal FrameFocusRect_Rounding = 5.0;
-        constexpr qreal PushButton_Rounding = 11.0; // probono: was: 15.0
+        // constexpr qreal PushButton_Rounding = 11.0; // probono: was: 15.0 // Calculate this where it is needed based on the widget's height
         constexpr qreal ToolButton_Rounding = 1.0; // probono: was: 5.0
         constexpr qreal ProgressBar_Rounding = 0.0;
         constexpr qreal GroupBox_Rounding = 5.0;
@@ -2088,7 +2088,7 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         bool isEnabled = option->state & State_Enabled;
         Q_UNUSED(isEnabled);
         bool hasFocus = (option->state & State_HasFocus && option->state & State_KeyboardFocusChange);
-        const qreal rounding = Ph::PushButton_Rounding;
+        const qreal rounding = option->rect.height() / 2 ; // probono: was: Ph::PushButton_Rounding;
         Swatchy outline = S_window_outline;
         Swatchy fill = S_button;
         Swatchy specular = S_button_specular;
@@ -2106,7 +2106,7 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         QRect r = option->rect;
         Ph::PSave save(painter);
         Ph::paintBorderedRoundRect(painter, r, rounding, swatch, outline, fill);
-        Ph::paintBorderedRoundRect(painter, r.adjusted(1, 1, -1, -1), rounding, swatch, specular, S_none);
+        Ph::paintBorderedRoundRect(painter, r.adjusted(1, 1, -1, -1), rounding - 1, swatch, specular, S_none);
         break;
     }
     case PE_FrameTabWidget: {
@@ -2132,7 +2132,8 @@ void BaseStyle::drawPrimitive(PrimitiveElement elem,
         // temp code
         Ph::PSave save(painter);
         if (bg) {
-            Ph::paintSolidRoundRect(painter, option->rect, Ph::PushButton_Rounding, swatch, bg);
+            const qreal rounding = (option->rect.height()) / 2 ; // probono: was: Ph::PushButton_Rounding;
+            Ph::paintSolidRoundRect(painter, option->rect, rounding, swatch, bg);
         }
         QPen pen = swatch.pen(fg);
         pen.setCapStyle(Qt::RoundCap);
@@ -2812,7 +2813,7 @@ void BaseStyle::drawControl(ControlElement element,
                 Ph::menuItemTextRect(metrics, option->direction, itemRect, hasSubMenu, hasIcon, menuItem->tabWidth);
             int t = s.indexOf(QLatin1Char('\t'));
             int text_flags =
-                Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic | Qt::TextDontClip | Qt::TextSingleLine; // probno: Was: Qt::AlignTop instead of Qt::AlignVCenter; https://github.com/helloSystem/hello/issues/152#issuecomment-961380640
+                Qt::AlignLeft | Qt::AlignVCenter | Qt::TextShowMnemonic | Qt::TextDontClip | Qt::TextSingleLine; // probono: was: Qt::AlignTop instead of Qt::AlignVCenter; https://github.com/helloSystem/hello/issues/152#issuecomment-961380640
             if (!styleHint(SH_UnderlineShortcut, menuItem, widget))
                 text_flags |= Qt::TextHideMnemonic;
 #if 0
@@ -4427,6 +4428,7 @@ QSize BaseStyle::sizeFromContents(ContentsType type,
             }
             newSize.rwidth() += pad * 2;
         }
+        newSize.rheight() = 22; // probono: Hardcode height to 22px
         break;
     }
     case CT_LineEdit: {
@@ -4506,6 +4508,15 @@ void BaseStyle::unpolish(QApplication* app)
 void BaseStyle::polish(QWidget *widget)
 {
     QCommonStyle::polish(widget);
+
+    // probono: Hardcode QPushButton height to 22 pixels
+    if (qobject_cast<QPushButton*>(widget))
+    {
+        widget->setFixedHeight(22);
+        // int radius = widget->height() / 2;
+        // button->setStyleSheet(QString("border-radius: %1px;").arg(radius)); // This crashes. Why?
+    }
+
     if (false
             || qobject_cast<QAbstractButton*>(widget)
             || qobject_cast<QComboBox *>(widget)
