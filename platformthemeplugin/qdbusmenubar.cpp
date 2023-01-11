@@ -93,10 +93,23 @@ void QDBusMenuBar::handleReparent(QWindow *newParentWindow)
     m_window = newParentWindow;
 
     if (newParentWindow) {
-        registerMenuBar();
+        static uint menuBarId = 0;
+
+        QDBusConnection connection = QDBusConnection::sessionBus();
+        m_objectPath = QStringLiteral("/MenuBar/%1").arg(++menuBarId);
+        if (!connection.registerObject(m_objectPath, m_menu))
+            return;
+
+        QDBusMenuRegistrarInterface registrar(REGISTRAR_SERVICE, REGISTRAR_PATH, connection, this);
+        QDBusPendingCall async = registrar.asyncCall("RegisterWindow",static_cast<uint>(window()->winId()), QVariant(m_objectPath));
+        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
+
+              QObject::connect(watcher,&QDBusPendingCallWatcher::finished,
+                      this, [this,newParentWindow,oldWindow] {
+                  emit windowChanged(newParentWindow, oldWindow);
+		  });
     }
 
-    emit windowChanged(newParentWindow, oldWindow);
 }
 
 QPlatformMenu *QDBusMenuBar::menuForTag(quintptr tag) const
