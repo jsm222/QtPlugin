@@ -155,15 +155,10 @@ void QDBusMenuBar::unregisterMenuBar()
 
     if (m_window) {
         QDBusMenuRegistrarInterface registrar(REGISTRAR_SERVICE, REGISTRAR_PATH, connection, this);
-        QDBusPendingReply<> r = registrar.UnregisterWindow(static_cast<uint>(window()->winId()));
-        r.waitForFinished();
-        if (r.isError())
-            qWarning("Failed to unregister window menu, reason: %s (\"%s\")",
-                     qUtf8Printable(r.error().name()), qUtf8Printable(r.error().message()));
+        QDBusPendingCall async = registrar.asyncCall("UnregisterWindow",static_cast<uint>(window()->winId()));
+        QDBusPendingCallWatcher *watcher = new QDBusPendingCallWatcher(async, this);
     }
 
-    if (!m_objectPath.isEmpty())
-        connection.unregisterObject(m_objectPath);
 }
 
 QT_END_NAMESPACE
